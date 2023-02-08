@@ -4,35 +4,32 @@ const minBoardSize = 9;
 
 let parent = document.getElementById("parent");
 let children = parent.children;
+let timer = document.getElementById("timer-till-lose");
 
 let Game = {
     running:false,
     hunter:{
-
+        pos:{}
     },
     survivor:{
         pos:{}
     },
+    timeUntilLose:0
 };
 
 buildBoard();
 
-
 function buildBoard() {
     let stringOfGridTemplateColumns = "";
     for(let i = 0; i < boardWidth; i++) {
-        stringOfGridTemplateColumns += "140px ";
+        stringOfGridTemplateColumns += "74px ";
     }
     parent.style.gridTemplateColumns = stringOfGridTemplateColumns;
     
     let start_button = document.getElementById("start-game-button");
     start_button.onclick = function () {
         if(boardSize >= minBoardSize) {
-            Game.running = true;
-            Game.survivor.pos = {};
-            localStorage.setItem("lastHuntLocation", (0 + "," + 0));
-            addCursorPointer();
-            handleUserClicked(children[0], 0, 0);
+            preGameReset();
         }
     }
     
@@ -52,30 +49,50 @@ function buildBoard() {
     }
 }
 
+function preGameReset() {
+    Game.timeUntilLose = 11;
+    timer.innerHTML = "Timer:" + Game.timeUntilLose;
+    Game.running = true;
+    Game.survivor.pos = {};
+    Game.hunter.pos = {x:0, y:0};
+    handleUserClicked(children[0], Game.hunter.pos.x, Game.hunter.pos.y);
+}
+
 
 function handleUserClicked(child, x, y) {
     
-    let isValidHuntLocation = checkIsValidHuntLocation(x, y);
+    let isValidHuntLocation = checkIfNearbyToHunter(x, y);
 
-    if(Game.running && isValidHuntLocation) {
+    if(Game.running && isValidHuntLocation && Game.timeUntilLose > 0) {
 
         preRoundCalculations();
 
         let didYouHit = checkIfHit(x, y);
-        let isHunterNearby = checkIfNearby(x, y);
+        let isHunterNearby = checkIfNearbyToSurvivor(x, y);
     
         changeStylings(child, didYouHit, isHunterNearby);
 
-        localStorage.setItem("lastHuntLocation", (x + "," + y));
+        Game.hunter.pos = {x:x, y:y};
+
+        Game.timeUntilLose -= 1;
+        timer.innerHTML = "Timer:" + Game.timeUntilLose;
+        if(Game.timeUntilLose == 0) {
+            removeCursorPointer();
+        }
+
+        addCursorPointer();
         
+    }
+    else if(!Game.running || Game.timeUntilLose == 0) {
+        removeCursorPointer();
     }
 
 }
 
 function checkIfHit(x, y) {
     if(x == Game.survivor.pos.x && y == Game.survivor.pos.y) {
-        Game.running = false;
         removeCursorPointer();
+        Game.running = false;
         return true;
     }
     else {
@@ -83,7 +100,7 @@ function checkIfHit(x, y) {
     }
 }
 
-function checkIfNearby(x, y) {
+function checkIfNearbyToSurvivor(x, y) {
     if((x == Game.survivor.pos.x || x-1 == Game.survivor.pos.x || x+1 == Game.survivor.pos.x) && 
        (y == Game.survivor.pos.y || y-1 == Game.survivor.pos.y || y+1 == Game.survivor.pos.y)) {
         return true
@@ -93,30 +110,30 @@ function checkIfNearby(x, y) {
     }
 }
 
-function checkIsValidHuntLocation(x, y) {
-    let lastHuntLocation = localStorage.getItem("lastHuntLocation");
-    let lastHuntLocationX = parseInt(lastHuntLocation[0]);
-    let lastHuntLocationY = parseInt(lastHuntLocation[2]);
-    if((x == lastHuntLocationX || x-1 == lastHuntLocationX || x+1 == lastHuntLocationX) &&
-       (y == lastHuntLocationY || y-1 == lastHuntLocationY || y+1 == lastHuntLocationY)) {
-        return true;
+function checkIfNearbyToHunter(x, y) {
+    if((x == Game.hunter.pos.x || x-1 == Game.hunter.pos.x || x+1 == Game.hunter.pos.x) && 
+       (y == Game.hunter.pos.y || y-1 == Game.hunter.pos.y || y+1 == Game.hunter.pos.y)) {
+        return true
     }
-    return false;
+    else {
+        return false;
+    }
 }
+
 
 function preRoundCalculations() {
     if(!Game.survivor.pos.x && !Game.survivor.pos.y) {
 
-        Game.survivor.pos.x = Math.floor(Math.random() * Math.sqrt(boardSize));
-        Game.survivor.pos.y = Math.floor(Math.random() * Math.sqrt(boardSize));
+        Game.survivor.pos.x = Math.floor(Math.random() * boardWidth);
+        Game.survivor.pos.y = Math.floor(Math.random() * boardWidth);
 
         while(Game.survivor.pos.x == 0 && Game.survivor.pos.y == 0 || 
               Game.survivor.pos.x == 0 && Game.survivor.pos.y == 1 ||
               Game.survivor.pos.x == 1 && Game.survivor.pos.y == 0 || 
               Game.survivor.pos.x == 1 && Game.survivor.pos.y == 1) {
 
-            Game.survivor.pos.x = Math.floor(Math.random() * Math.sqrt(boardSize));
-            Game.survivor.pos.y = Math.floor(Math.random() * Math.sqrt(boardSize));
+            Game.survivor.pos.x = Math.floor(Math.random() * boardWidth);
+            Game.survivor.pos.y = Math.floor(Math.random() * boardWidth);
         }
 
 
@@ -153,6 +170,7 @@ function preRoundCalculations() {
 }
 
 function changeStylings(child, didYouHit, isHunterNearby) {
+
     for(let child of children) {
         child.style.background = "gray";
     }
@@ -177,11 +195,19 @@ function changeStylings(child, didYouHit, isHunterNearby) {
 
 function addCursorPointer() {
     for(let child of children) {
-        child.classList.add("pointer");
+        if(checkIfNearbyToHunter(parseInt(child.innerHTML[0]), parseInt(child.innerHTML[2]))) {
+            child.classList.add("pointer");
+            child.classList.remove("not-allowed");
+        }
+        else {
+            child.classList.add("not-allowed");
+            child.classList.remove("pointer");
+        }
     }
 }
 function removeCursorPointer() {
     for(let child of children) {
+        child.classList.remove("not-allowed");
         child.classList.remove("pointer");
     }
 }
