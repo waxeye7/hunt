@@ -190,7 +190,6 @@ function changeStylings(child, didYouHit, isHunterNearby) {
 
     }
     
-    
 }
 
 function addCursorPointer() {
