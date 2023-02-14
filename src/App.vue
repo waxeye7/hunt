@@ -5,7 +5,6 @@ import BoardComponent from "./components/Board.vue";
 </script>
 <template>
   <TitleComponent />
-  <!-- <BoardComponent /> -->
-  <Board2 />
+  <BoardComponent />
 </template>
 <style scoped></style>

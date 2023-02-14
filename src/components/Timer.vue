@@ -3,7 +3,10 @@
 </script>
 
 <template>
-    <div class="timer-till-lose">Timer:{{  timer  }}</div>
+    <div :class="[(timer <= 5)?'five-turns-left':'',
+    (timer <= 10 && timer > 5)?'ten-turns-left':'',
+    (timer > 10)?'more-than-ten-turns-left':'']"
+    class="timer-till-lose">Turns: {{  timer  }}</div>
 </template>
 
 <style scoped>
@@ -15,14 +18,25 @@
     border-radius: 4px;
     padding:10px;
     font-size: 34px;
-    background-color:rgb(212, 210, 210);
     color:rgb(0, 0, 0);
+}
+.ten-turns-left {
+    background-color:rgb(255, 152, 17);
+}
+.five-turns-left {
+    background-color:rgb(255, 131, 131);
+}
+.more-than-ten-turns-left {
+    background-color: rgb(5, 200, 5);
 }
 </style>
 
 
 <script>
     export default {
+        methods: {
+
+        },
         props: {
             timer: {
                 type: Number,
@@ -30,5 +44,4 @@
             }
         }
     }
-    
 </script>

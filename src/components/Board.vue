@@ -1,6 +1,8 @@
 <script setup>
 import StartGameButtonComponent from "./StartGameButton.vue";
 import TimerComponent from "./Timer.vue";
+import InputX from "./Xinput.vue";
+import InputY from "./Yinput.vue";
 </script>
 
 <template>
@@ -11,11 +13,14 @@ import TimerComponent from "./Timer.vue";
 
     <StartGameButtonComponent @click="startGame"/>
     <TimerComponent :timer="timeUntilLose" />
+    <InputX @inputted="updateBoardCols" />
+    <InputY @inputted="updateBoardRows" />
    
+    <!-- <input type=""></input> -->
     
     </div>
     <div class="board">
-        <div v-for="(row, rowIdx) in boardList" :key="rowIdx" class="row">
+        <div v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
             <div 
                 v-for="(col, colIdx) in row" 
                 :key="colIdx" 
@@ -25,7 +30,7 @@ import TimerComponent from "./Timer.vue";
                 ]" 
                 @click="handleUserClicked(colIdx, rowIdx)"
             >
-                {{ `${colIdx}, ${rowIdx}` }}
+                {{ `${col.pos.x}, ${col.pos.y}` }}
             </div>
         </div>
     </div>
@@ -36,12 +41,11 @@ import TimerComponent from "./Timer.vue";
 <script>
 export default  {
     data() {
-        return{
-            boardCols: 7,
-            boardRows: 6,
-            minBoardSize : 9,
-            boardList: [],
-            childrenIDs: [],
+        return {
+            boardCols: 3,
+            boardRows: 3,
+            minBoardSize : 5,
+            boardObjs: [],
             running:false,
             maxTrailLength: 3,
             hunter:{
@@ -54,16 +58,31 @@ export default  {
                 },
                 trail: []
             },
-            timeUntilLose: 0
+            timeUntilLose: 15
         }
     },
     computed: {
         boardSize() {
+            // this.boardCols = 9;
             return this.boardCols * this.boardRows;
         },
     },
     methods:{
         preGameReset() {
+            this.boardObjs = [];
+            let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
+            let rowNum = 0;
+            for(let row of boardList) {
+                let colNum = 0;
+                let rowList = [];
+                for(let squareInRow of row) {
+                    rowList.push(this.createSquareObject(colNum, rowNum));
+                    colNum += 1;
+                }
+                rowNum += 1;
+                this.boardObjs.push(rowList)
+            }
+            console.log(this.boardObjs);
             this.timeUntilLose = 15;
             this.survivor.trail = []
             this.timer = this.timeUntilLose;
@@ -82,6 +101,15 @@ export default  {
             }
             
             this.hunter.pos = {x:0, y:0};
+        },
+        createSquareObject(x, y) {
+            let square = {
+                pos:{
+                    x:x,
+                    y:y
+                },
+            };
+            return square;
         },
         startGame() {
             if (this.boardSize >= this.minBoardSize) {
@@ -192,11 +220,17 @@ export default  {
 
             classes.push(this.trailClass(x, y));
             return classes;
+        },
+        updateBoardCols(value) {
+            this.boardCols = value
+        },
+        updateBoardRows(value) {
+            this.boardRows = value
         }
     },
     
     created() {
-        this.boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols))
+        // this.boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols))
     }
 }
 </script>
@@ -220,7 +254,7 @@ export default  {
     background-color: gray;
     color:white;
     font-size:30px;
-    margin: 2px;
+    margin: 6px;
     height: 100px;
     width: 100px;
 }
