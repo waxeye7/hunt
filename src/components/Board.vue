@@ -6,18 +6,22 @@ import InputY from "./Yinput.vue";
 </script>
 
 <template>
-    <!-- {{ survivor.trail }} -->
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
-<div class="flex flex-col align-center">
-    <div class="flex">
+     <br><br>
+    <div class="flex flex-col align-center">
+    <div class="flex lower-res-screen">
 
-    <StartGameButtonComponent @click="startGame"/>
-    <TimerComponent :timer="timeUntilLose" />
-    <InputX @inputted="updateBoardCols" />
-    <InputY @inputted="updateBoardRows" />
-   
-    <!-- <input type=""></input> -->
-    
+    <div class="flex">
+        <StartGameButtonComponent @click="startGame"/>
+        <TimerComponent :timer="timeUntilLose" />
+    </div>
+    <div class="flex">
+        <InputX @inputted="updateBoardCols" />
+        <InputY @inputted="updateBoardRows" />
+    </div>
+
+
+
     </div>
     <div class="board">
         <div v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
@@ -26,9 +30,9 @@ import InputY from "./Yinput.vue";
                 :key="colIdx" 
                 :class="[
                     'col', 
-                    squareClasses(colIdx, rowIdx),
+                    squareClasses(col.pos.x, col.pos.y),
                 ]" 
-                @click="handleUserClicked(colIdx, rowIdx)"
+                @click="handleUserClicked(col.pos.x, col.pos.y)"
             >
                 {{ `${col.pos.x}, ${col.pos.y}` }}
             </div>
@@ -63,7 +67,6 @@ export default  {
     },
     computed: {
         boardSize() {
-            // this.boardCols = 9;
             return this.boardCols * this.boardRows;
         },
     },
@@ -93,7 +96,8 @@ export default  {
             while(this.survivor.pos.x == 0 && this.survivor.pos.y == 0 || 
                 this.survivor.pos.x == 0 && this.survivor.pos.y == 1 ||
                 this.survivor.pos.x == 1 && this.survivor.pos.y == 0 || 
-                this.survivor.pos.x == 1 && this.survivor.pos.y == 1) {
+                this.survivor.pos.x == 1 && this.survivor.pos.y == 1 ||
+                !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
 
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
                 this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
@@ -103,9 +107,9 @@ export default  {
             this.hunter.pos = {x:0, y:0};
         },
         createSquareObject(x, y) {
-            let randomNum = Math.floor(Math.random() * 5);
+            let randomNum = Math.floor(Math.random() * 4);
             let active;
-            if(randomNum == 0 && (x !== 0 || y !== 0) && (x !== 1 || y !== 1) && (x !== 2 || y !== 2)) {
+            if(randomNum == 0 && (x !== 0 || y !== 0)) {
                 active = false;
             }
             else {
@@ -222,12 +226,25 @@ export default  {
                     // let squareInQuestion = this.boardObjs[this.survivor.pos.y][this.survivor.pos.x-1];
                     // if(squareInQuestion.terrain.active) {
                         xMoves.push(-1);
+                        if(this.hunter.pos.x === this.survivor.pos.x + 1) {
+                            xMoves.push(-1,-1,-1);
+                        }
+                        else if(this.hunter.pos.x === this.survivor.pos.x + 2) {
+                            xMoves.push(-1,-1);
+                        }
                     // }
                 }
                 if (this.survivor.pos.x < this.boardCols -1) {
                     // let squareInQuestion = this.boardObjs[this.survivor.pos.y][this.survivor.pos.x+1];
                     // if(squareInQuestion.terrain.active) {
                         xMoves.push(1);
+                        if(this.hunter.pos.x === this.survivor.pos.x - 1) {
+                            xMoves.push(1,1,1);
+                        }
+                        else if(this.hunter.pos.x === this.survivor.pos.x - 2) {
+                            xMoves.push(1,1);
+                        }
+
                     // }
                 }
                 const xDirection = Math.floor(Math.random() * xMoves.length);
@@ -238,16 +255,31 @@ export default  {
                     // let squareInQuestion = this.boardObjs[this.survivor.pos.y-1][this.survivor.pos.x];
                     // if(squareInQuestion.terrain.active) {
                         yMoves.push(-1);
+                        if(this.hunter.pos.y === this.survivor.pos.y + 1) {
+                            yMoves.push(-1,-1,-1);
+                        }
+                        else if(this.hunter.pos.y === this.survivor.pos.y + 2) {
+                            yMoves.push(-1,-1);
+                        }
                     // }
                 }
                 if (this.survivor.pos.y < this.boardRows -1) {
                     // let squareInQuestion = this.boardObjs[this.survivor.pos.y+1][this.survivor.pos.x];
                     // if(squareInQuestion.terrain.active) {
                         yMoves.push(1);
+
+                        if(this.hunter.pos.y === this.survivor.pos.y - 1) {
+                            yMoves.push(1,1,1);
+                        }
+                        else if(this.hunter.pos.y === this.survivor.pos.y - 2) {
+                            yMoves.push(1,1);
+                        }
                     // }
                 }
                 const yDirection = Math.floor(Math.random() * yMoves.length);
                 let newY = this.survivor.pos.y + yMoves[yDirection];
+
+                console.log(xMoves, yMoves)
 
                 let squareToGo = this.boardObjs[newY][newX]
                 if(!squareToGo.has_hunter && squareToGo.terrain.active) {
@@ -343,7 +375,7 @@ export default  {
 .col {
     background-color: gray;
     color:white;
-    font-size:30px;
+    font-size:20px;
     margin: 2px;
     height: 60px;
     width: 60px;
@@ -385,6 +417,18 @@ export default  {
 
 .trail-3 {
     background-color: #fa9f50 !important;
+}
+
+@media only screen and (max-width: 600px) {
+    .col {
+        font-size:12px;
+        margin: 1px;
+        height: 40px;
+        width: 40px;
+    }
+    .lower-res-screen {
+        flex-direction:column;
+    }
 }
 </style>
 

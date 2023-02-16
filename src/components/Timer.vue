@@ -13,7 +13,6 @@
 .timer-till-lose {
     margin:-10px 0 30px 20px;
     display:flex;
-    margin-left: 20px;    
     height:fit-content;
     border-radius: 4px;
     padding:10px;
@@ -28,6 +27,13 @@
 }
 .more-than-ten-turns-left {
     background-color: rgb(5, 200, 5);
+}
+
+
+@media only screen and (max-width: 600px) {
+    .timer-till-lose {
+        font-size: 24px;
+    }
 }
 </style>
 
