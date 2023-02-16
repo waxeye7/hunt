@@ -414,15 +414,24 @@ export default  {
 }
 
 .trail-1 {
-    background-color: #fff0e3 !important;
+    background-image: url("../assets/cheese.png") !important;
+    background-size:30px 30px;
+    background-position:center;
+    background-repeat: no-repeat;
 }
 
 .trail-2 {
-    background-color: #facfaa !important;
+    background-image: url("../assets/cheese.png") !important;
+    background-size:40px 40px;
+    background-position:center;
+    background-repeat: no-repeat;
 }
 
 .trail-3 {
-    background-color: #fa9f50 !important;
+    background-image: url("../assets/cheese.png") !important;
+    background-size:50px 50px;
+    background-position:center;
+    background-repeat: no-repeat;
 }
 
 @media only screen and (max-width: 600px) {
