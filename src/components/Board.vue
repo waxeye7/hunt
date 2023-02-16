@@ -403,14 +403,16 @@ export default  {
 
 .success {
     background-image: url("../assets/won.png") !important;
-    background-size:70px 70px;
+    background-size:40px 40px;
     background-position:center;
+    background-repeat: no-repeat;
 }
 
 .survivor-near {
     background-image: url("../assets/survivor.gif") !important;
     background-size:70px 70px;
     background-position:center;
+    background-repeat: no-repeat;
 }
 
 .trail-1 {
