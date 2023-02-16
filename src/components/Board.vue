@@ -394,17 +394,23 @@ export default  {
     visibility: hidden;
 }
 .active {
-    background-color: red !important;
+    background-image: url("../assets/hunt.webp") !important;
+    background-size:70px 70px;
+    background-position:center;
     cursor: default !important;
 }
 
 
 .success {
-    background-color: green !important;
+    background-image: url("../assets/won.png") !important;
+    background-size:70px 70px;
+    background-position:center;
 }
 
 .survivor-near {
-    background-color: #fa7502 !important;
+    background-image: url("../assets/survivor.gif") !important;
+    background-size:70px 70px;
+    background-position:center;
 }
 
 .trail-1 {
