@@ -102,7 +102,8 @@ export default  {
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
                 this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
             }
-            
+
+            this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
             this.boardObjs[0][0].has_hunter = true;
             this.hunter.pos = {x:0, y:0};
         },
@@ -140,8 +141,13 @@ export default  {
                     if(square.survivor_trail.strength > 0) {
                         square.survivor_trail.strength -= 1;
                     }
-                    square.has_hunter = false;
-                    square.has_survivor = false;
+                    if(this.hunter.pos.x !== square.pos.x || this.hunter.pos.y !== square.pos.y) {
+                        square.has_hunter = false;
+                    }
+                    if(this.survivor.pos.x !== square.pos.x || this.survivor.pos.y !== square.pos.y) {
+                        square.has_survivor = false;
+                    }
+                    
                 }
             }
         },
@@ -162,13 +168,17 @@ export default  {
                     console.log(this.boardObjs)
 
 
-                    this.timePassesUpdateSquareObjects();
-                    survivorSquare.survivor_trail.strength = 3;
-
                     this.preRoundCalculations();
 
-                    clickedSquare.has_hunter = true;
                     this.hunter.pos = {x:x, y:y};
+                    clickedSquare.has_hunter = true;
+
+                    this.timePassesUpdateSquareObjects();
+                    survivorSquare.survivor_trail.strength = 3;
+                    
+
+                    
+
 
                     this.timeUntilLose -= 1;
 
@@ -279,7 +289,7 @@ export default  {
                 const yDirection = Math.floor(Math.random() * yMoves.length);
                 let newY = this.survivor.pos.y + yMoves[yDirection];
 
-                console.log(xMoves, yMoves)
+                // console.log(xMoves, yMoves)
 
                 let squareToGo = this.boardObjs[newY][newX]
                 if(!squareToGo.has_hunter && squareToGo.terrain.active) {
@@ -376,28 +386,42 @@ export default  {
     background-color: gray;
     color:white;
     font-size:20px;
-    margin: 2px;
+    margin: 1px;
     height: 60px;
     width: 60px;
 }
 
+
 .allowed {
     cursor: pointer;
+}
+.allowed:hover {
+    border-radius:2px;
+    outline:2px white solid;
 }
 
 .not-allowed {
     cursor: not-allowed;
 }
 .inactive-square {
-    background-color:rgb(88, 88, 88);
+    background-color:rgb(10, 26, 255) !important;
+    color:rgb(10, 26, 255);
     cursor:default;
-    visibility: hidden;
+    background-image: url("../assets/water.jpg") !important;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position:center;
+    /* visibility: hidden; */
 }
 .active {
     background-image: url("../assets/hunt.webp") !important;
     background-size:70px 70px;
     background-position:center;
     cursor: default !important;
+}
+.active:hover {
+    outline:none !important;
+    background-color:gray !important; 
 }
 
 
@@ -406,6 +430,7 @@ export default  {
     background-size:40px 40px;
     background-position:center;
     background-repeat: no-repeat;
+    background-color:#358223 !important;
 }
 
 .survivor-near {
