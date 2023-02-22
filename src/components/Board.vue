@@ -45,8 +45,8 @@ import InputY from "./Yinput.vue";
 export default  {
     data() {
         return {
-            boardCols: 3,
-            boardRows: 3,
+            boardCols: 5,
+            boardRows: 5,
             minBoardSize : 5,
             boardObjs: [],
             running:false,
@@ -64,7 +64,8 @@ export default  {
                 },
                 trail: []
             },
-            timeUntilLose:15
+            timeUntilLose:15,
+            discovered:[],
         }
     },
     computed: {
@@ -90,9 +91,9 @@ export default  {
                 rowNum += 1;
                 this.boardObjs.push(rowList)
             }
-            console.log(this.boardObjs);
+            // console.log(this.boardObjs);
 
-            this.checkSquaresInactiveDontMakeIsland();
+            // this.checkSquaresInactiveDontMakeIsland();
 
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
@@ -115,161 +116,78 @@ export default  {
             this.boardObjs[0][0].has_hunter = true;
             this.hunter.pos = {x:0, y:0};
         },
-        checkSquaresInactiveDontMakeIsland() {
-            for(let row of this.boardObjs) {
-                for(let square of row) {
-                    if(!square.terrain.active) {
-                        let squaresAroundSquare = this.findSquaresAroundThisSquareAndMakeActive(square.pos.x, square.pos.y);
-                    }
-                }
-            }
-        },
-        findSquaresAroundThisSquareAndMakeActive(x, y) {
-            let ListOfSquareObjects = [];
+        // checkSquaresInactiveDontMakeIsland() {
+        //     for(let row of this.boardObjs) {
+        //         for(let square of row) {
+        //             if(!square.terrain.active) {
+        //                 if(square.pos.x !== 0 && square.pos.y !== 0) {
+        //                     let isValidPath = this.searchPath(this.boardObjs[0][0], square);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
+        // searchPath(start, end) {
 
-            let top_left = false;
-            let left = false;
-            let bottom_left = false;
-            let bottom = false;
-            let bottom_right = false;
-            let right = false;
-            let top_right = false;
-            let top = false;
+        //     this.discovered = [
+        //         (start.pos.x + "," + start.pos.y)
+        //     ];
 
-            if(x == 0) {
-                top_left = true;
-                left = true;
-                bottom_left = true;
-            }
-            if(y == 0) {
-                top_left = true;
-                top = true;
-                top_right = true;
-            }
-            if(x == this.boardCols - 1) {
-                top_right = true;
-                right = true;
-                bottom_right = true;
-            }
-            if(y == this.boardRows - 1) {
-                bottom_left = true;
-                bottom = true;
-                bottom_right = true;
-            }
+        //     let stack = this.findAdjacentTiles([0,0])
+        //     console.log(stack);
+        //     while(stack.length > 0) {
+        //         console.log(this.discovered)
+        //         console.log(stack);
 
-            if(!top_left && !left && !top) {
-                console.log(x,y)
-                if(!this.boardObjs[y][x-1].terrain.active && !this.boardObjs[y-1][x-1].terrain.active && !this.boardObjs[y-1][x].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y][x-1].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y-1][x-1].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y-1][x].terrain.active = true;
-                    }
-                    console.log('a')
-                }
-            }
-            if(!bottom_left && !left && !top_left) {
-                console.log(x,y)
-                if(!this.boardObjs[y][x-1].terrain.active && !this.boardObjs[y-1][x-1].terrain.active && !this.boardObjs[y+1][x-1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y][x-1].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y-1][x-1].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y+1][x-1].terrain.active = true;
-                    }
-                    console.log('b')
-                }
-            }
-            if(!bottom_left && !bottom && !bottom_right) {
-                console.log(x,y)
-                if(!this.boardObjs[y+1][x-1].terrain.active && !this.boardObjs[y+1][x].terrain.active && !this.boardObjs[y+1][x+1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y+1][x-1].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y+1][x].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y+1][x+1].terrain.active = true;
-                    }
-                    console.log('c')
-                }
-            }
-            if(!bottom && !bottom_right && !right) {
-                console.log(x,y)
-                if(!this.boardObjs[y+1][x+1].terrain.active && !this.boardObjs[y+1][x].terrain.active && !this.boardObjs[y][x+1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y+1][x+1].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y+1][x].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y][x+1].terrain.active = true;
-                    }
-                    console.log('d')
-                }
-            }
-            if(!bottom_right && !right && !top_right) {
-                console.log(x,y)
-                if(!this.boardObjs[y+1][x+1].terrain.active && !this.boardObjs[y-1][x+1].terrain.active && !this.boardObjs[y][x+1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y+1][x+1].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y-1][x+1].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y][x+1].terrain.active = true;
-                    }
-                    console.log('e')
-                }
-            }
-            if(!top && !right && !top_right) {
-                console.log(x,y)
-                if(!this.boardObjs[y-1][x].terrain.active && !this.boardObjs[y-1][x+1].terrain.active && !this.boardObjs[y][x+1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y-1][x].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y-1][x+1].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y][x+1].terrain.active = true;
-                    }
-                    console.log('f')
-                }
-            }
-            if(!top && !top_left && !top_right) {
-                console.log(x,y)
-                if(!this.boardObjs[y-1][x].terrain.active && !this.boardObjs[y-1][x+1].terrain.active && !this.boardObjs[y-1][x-1].terrain.active) {
-                    let randomDecider = Math.floor(Math.random() * 3);
-                    if(randomDecider == 0) {
-                        this.boardObjs[y-1][x].terrain.active = true;
-                    }
-                    else if(randomDecider == 1) {
-                        this.boardObjs[y-1][x+1].terrain.active = true;
-                    }
-                    else if(randomDecider == 2) {
-                        this.boardObjs[y-1][x-1].terrain.active = true;
-                    }
-                    console.log('g')
-                }
-            }
-        },
+        //         let nextOnesInLine = this.findAdjacentTiles([parseInt(stack[stack.length - 1][0]),parseInt(stack[stack.length - 1][2])]);
+        //         console.log(nextOnesInLine)
+        //         if(nextOnesInLine.length > 0) {
+        //             let nextX = nextOnesInLine[nextOnesInLine.length - 1][0]
+        //             let nextY = nextOnesInLine[nextOnesInLine.length - 1][1]
+        //             console.log(this.discovered.includes(nextX + "," + nextY))
+        //             if(!this.discovered.includes(nextX + "," + nextY)) {
+        //                 this.discovered.push(nextX + "," + nextY);
+
+        //                 let adjacdentSquares = this.findAdjacentTiles([nextX,nextY]);
+        //                 for(let square of adjacdentSquares) {
+        //                     stack.push(square);
+        //                 }
+
+        //             }
+        //         }
+        //         else {
+        //             stack.pop();
+        //         }
+        //     }
+            
+
+
+        // },
+        // findAdjacentTiles(currentLocation) {
+        //     let neighbours = [];
+        //     for(let i = -1; i <= 1; i++) {
+        //         for(let o = -1; o <= 1; o++) {
+
+        //             let x = i + currentLocation[0];
+        //             let y = o + currentLocation[1];
+        //             // console.log(x,y)
+        //             if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation[0] || y !== currentLocation[1])) {
+        //                 console.log(x,y)
+        //                 if(this.boardObjs[y][x] && 
+        //                 this.boardObjs[y][x].terrain.active && 
+        //                 !this.discovered.includes(x + "," + y)) {
+        //                     neighbours.push(x + "," + y)
+        //                 }
+        //                 else if(this.boardObjs[y][x] &&
+        //                 !this.boardObjs[y][x].terrain.active && 
+        //                 !this.discovered.includes(x + "," + y)) {
+        //                     this.discovered.push(x + "," + y)
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     return neighbours;
+        // },
         createSquareObject(x, y, squareNumber) {
             let randomNum = Math.floor(Math.random() * 2);
             let active;
@@ -329,7 +247,7 @@ export default  {
 
                 if (this.running && isValidHuntLocation && this.timeUntilLose > 0) {
 
-                    console.log(this.boardObjs)
+                    // console.log(this.boardObjs)
 
                     this.preRoundCalculations();
 

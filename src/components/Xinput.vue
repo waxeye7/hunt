@@ -21,7 +21,7 @@
 export default  {
     data() {
         return {
-            x:3
+            x:5
         }
     },
 
