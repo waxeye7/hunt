@@ -455,7 +455,7 @@ export default  {
     },
     
     created() {
-
+        this.startGame()
     }
 }
 </script>

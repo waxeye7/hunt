@@ -1,33 +1,30 @@
 <template>
     <div class="container">
         <div class="center">
-            <h1>Welcome To</h1>
-            <h1> The Hunting Game!</h1>
+            <h1>Multiplayer</h1>
+            <h1></h1>
+        </div>
+        <div class="flex flex-col links">
+            <router-link to="/multiplayer/create" class="link-style">Create Game</router-link>
+            <router-link to="/multiplayer/join" class="link-style">Join Game</router-link>
         </div>
 
-
-        <div class="links flex flex-col">
-            <router-link to="/singleplayer" class="link-style">Singleplayer</router-link>
-            <router-link to="/multiplayer" class="link-style">Multiplayer</router-link>
-        </div>
     </div>
 </template>
 
 <style scoped>
-.link-style:hover {
-    background-color: rgb(0, 0, 0);
-}
 .center {
     padding-top: 10px;
     margin:0 auto;
     text-align: center;
 }
-.center h1 {
-    font-size: 40px;
-}
 .container {
     height:calc(100vh - 46px);
     background-color:white !important;
+}
+.links {
+    justify-content: center;
+    align-items: center;
 }
 .link-style {
     text-decoration: none;
@@ -39,9 +36,8 @@
     width:200px;
     text-align: center;
 }
-.links {
-    justify-content: center;
-    align-items: center;
+.link-style:hover {
+    background-color: rgb(0, 0, 0);
 }
 </style>
 

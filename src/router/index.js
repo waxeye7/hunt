@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import Home from "../views/Home.vue";
-import About from "../views/About.vue";
+import Singleplayer from "../views/Singleplayer.vue";
+import Multiplayer from "../views/Multiplayer.vue";
+import Createserver from "../views/Createserver.vue";
+import Joinserver from "../views/Joinserver.vue";
 
 const routes = [
     {
@@ -10,9 +13,24 @@ const routes = [
         component: Home
     },
     {
-        path:'/about',
-        name:'About',
-        component: About
+        path:'/singleplayer',
+        name:'Singleplayer',
+        component: Singleplayer
+    },
+    {
+        path:'/multiplayer',
+        name:'Multiplayer',
+        component: Multiplayer
+    },
+    {
+        path:'/multiplayer/create',
+        name:'Create',
+        component: Createserver
+    },
+    {
+        path:'/multiplayer/join',
+        name:'Join',
+        component: Joinserver
     }
 ];
 
