@@ -22,8 +22,16 @@ import InputY from "./Yinput.vue";
 
 
     </div>
-    <div class="board">
-        <div v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
+
+
+
+    <div class="board relative">
+
+        <div v-if="victory" class="victory-popup">
+            <h1>congratulations you have won</h1>
+        </div>
+
+        <div  v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
             <div 
                 v-for="(col, colIdx) in row" 
                 :key="colIdx" 
@@ -47,9 +55,10 @@ export default  {
         return {
             boardCols: 5,
             boardRows: 5,
-            minBoardSize : 5,
+            minBoardSize : 8,
             boardObjs: [],
             running:false,
+            victory:false,
             maxTrailLength: 3,
             hunter:{
                 pos:{
@@ -97,6 +106,7 @@ export default  {
 
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
+            this.victory = false;
             this.running = true;
 
             this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
@@ -260,6 +270,7 @@ export default  {
                     this.timeUntilLose -= 1;
 
                     if (this.isSuccess(x, y) || this.timeUntilLose === 0) {
+                        this.victory = true;
                         this.running = false;
                     }
                 }
@@ -405,11 +416,16 @@ export default  {
             const classes = [];
 
             let square = this.boardObjs[y][x];
+
+            if(this.victory) {
+                classes.push("lower-brightness")
+            }
+
             if(!square.terrain.active) {
                 classes.push('inactive-square');
                 return classes;
             }
-
+            
             classes.push(this.checkIfNearbyToHunter(x, y) && this.running ? 'allowed' : 'not-allowed');
 
             if (this.isSuccess(x, y)) {
@@ -451,6 +467,21 @@ export default  {
 .flex-col { flex-direction:column; }
 .justify-center { justify-content:center; }
 .align-center { align-items:center; }
+.victory-popup {
+    position:absolute;
+    color:rgb(255, 255, 255);background-color:rgba(0, 255, 64, 0.256);
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    max-width:246px;
+    min-height:82px;
+    z-index: 10;
+    text-align: center;
+    
+}
+.lower-brightness {
+    filter: brightness(0.36);
+}
 .board {
     padding: 48px;
     background-color:rgb(88, 88, 88);
