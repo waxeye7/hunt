@@ -85,7 +85,6 @@ export default  {
                 trail: []
             },
             timeUntilLose:15,
-            discovered:[],
         }
     },
     computed: {
@@ -137,78 +136,71 @@ export default  {
             this.boardObjs[0][0].has_hunter = true;
             this.hunter.pos = {x:0, y:0};
         },
-        // checkSquaresInactiveDontMakeIsland() {
-        //     for(let row of this.boardObjs) {
-        //         for(let square of row) {
-        //             if(!square.terrain.active) {
-        //                 if(square.pos.x !== 0 && square.pos.y !== 0) {
-        //                     let isValidPath = this.searchPath(this.boardObjs[0][0], square);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
-        // searchPath(start, end) {
+        checkSquaresInactiveDontMakeIsland() {
+            for(let row of this.boardObjs) {
+                for(let square of row) {
+                    if(!square.terrain.active) {
+                        if(square.pos.x !== 0 && square.pos.y !== 0) {
+                            let isValidPath = this.bfs(this.boardObjs[0][0], square);
+                            if(!isValidPath && square.terrain.active) {
+                                console.log("removing", square.pos.x, square.pos.y)
+                                square.terrain.active = false;
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        bfs(startNode, targetNode) {
 
-        //     this.discovered = [
-        //         (start.pos.x + "," + start.pos.y)
-        //     ];
+            let visited = new Set();
+            let queue = [startNode];
 
-        //     let stack = this.findAdjacentTiles([0,0])
-        //     console.log(stack);
-        //     while(stack.length > 0) {
-        //         console.log(this.discovered)
-        //         console.log(stack);
+            while(queue.length > 0) {
+                let currentNode = queue.shift();  // Remove the first node from the queue
+    
+                if (currentNode === targetNode) {
+                    return true;  // We've found the target node!
+                }
 
-        //         let nextOnesInLine = this.findAdjacentTiles([parseInt(stack[stack.length - 1][0]),parseInt(stack[stack.length - 1][2])]);
-        //         console.log(nextOnesInLine)
-        //         if(nextOnesInLine.length > 0) {
-        //             let nextX = nextOnesInLine[nextOnesInLine.length - 1][0]
-        //             let nextY = nextOnesInLine[nextOnesInLine.length - 1][1]
-        //             console.log(this.discovered.includes(nextX + "," + nextY))
-        //             if(!this.discovered.includes(nextX + "," + nextY)) {
-        //                 this.discovered.push(nextX + "," + nextY);
-
-        //                 let adjacdentSquares = this.findAdjacentTiles([nextX,nextY]);
-        //                 for(let square of adjacdentSquares) {
-        //                     stack.push(square);
-        //                 }
-
-        //             }
-        //         }
-        //         else {
-        //             stack.pop();
-        //         }
-        //     }
-            
+                visited.add(currentNode.id);
+                console.log("queue", queue)
+                console.log("visited", visited)
 
 
-        // },
-        // findAdjacentTiles(currentLocation) {
-        //     let neighbours = [];
-        //     for(let i = -1; i <= 1; i++) {
-        //         for(let o = -1; o <= 1; o++) {
+                let neighbours = this.findAdjacentTiles(currentNode);
+                console.log("neightbours", neighbours)
+                // Add all unvisited neighbors to the queue
+                for(let neighbor of neighbours) {
+                    if (!visited.has(neighbor.id)) {
+                        queue.push(neighbor);
+                    }
+                }
+            }
+            return false;   // We didn't find the target node
+        },
+        findAdjacentTiles(currentLocation) {
+            let neighbours = [];
+            console.log(currentLocation)
+            if(currentLocation && currentLocation.pos && currentLocation.pos.x && currentLocation.pos.y) {
+                console.log(currentLocation)
+                for(let i = -1; i <= 1; i++) {
+                    for(let o = -1; o <= 1; o++) {
+                        let x = i + currentLocation.pos.x;
+                        let y = o + currentLocation.pos.y;
+                        if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation[0] || y !== currentLocation[1])) {
+                            console.log(x,y)
+                            if(this.boardObjs[y][x] && 
+                            this.boardObjs[y][x].terrain.active) {
+                                neighbours.push(x + "," + y)
+                            }
+                        }
+                    }
+                }
+            }
 
-        //             let x = i + currentLocation[0];
-        //             let y = o + currentLocation[1];
-        //             // console.log(x,y)
-        //             if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation[0] || y !== currentLocation[1])) {
-        //                 console.log(x,y)
-        //                 if(this.boardObjs[y][x] && 
-        //                 this.boardObjs[y][x].terrain.active && 
-        //                 !this.discovered.includes(x + "," + y)) {
-        //                     neighbours.push(x + "," + y)
-        //                 }
-        //                 else if(this.boardObjs[y][x] &&
-        //                 !this.boardObjs[y][x].terrain.active && 
-        //                 !this.discovered.includes(x + "," + y)) {
-        //                     this.discovered.push(x + "," + y)
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     return neighbours;
-        // },
+            return neighbours;
+        },
         createSquareObject(x, y, squareNumber) {
             let randomNum = Math.floor(Math.random() * 2);
             let active;

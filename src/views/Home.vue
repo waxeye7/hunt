@@ -53,7 +53,7 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     padding:30px;
     background-color: rgb(46, 46, 46);
     color:white;
-    font-size: 30px;
+    font-size: 26px;
     width:200px;
     text-align: center;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
