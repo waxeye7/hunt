@@ -13,6 +13,7 @@
     border-radius: 4px;
     padding:10px;
     width:70px;
+    cursor: default;
 }
 </style>
 

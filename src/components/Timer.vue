@@ -18,7 +18,9 @@
     padding:10px;
     font-size: 34px;
     color:rgb(0, 0, 0);
+    cursor: default;
 }
+
 .ten-turns-left {
     background-color:rgb(255, 152, 17);
 }

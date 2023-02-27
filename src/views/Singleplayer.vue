@@ -5,8 +5,8 @@ import BoardComponent from "../components/Board.vue";
 
 <template>
     <div>
+        <BoardComponent :timesWon="timesWon" @updateTimesWon="get_times_won" />
         
-        <BoardComponent />
     </div>
 </template>
 
@@ -16,6 +16,15 @@ import BoardComponent from "../components/Board.vue";
 
 <script>
     export default {
-        
+        data() {
+            return {
+                timesWon:0,
+            }
+        },
+        methods:{
+            get_times_won(timesWon) {
+                this.timesWon = timesWon;
+            }
+        }
     }
 </script>

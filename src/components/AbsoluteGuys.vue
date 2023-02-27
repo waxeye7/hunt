@@ -36,16 +36,16 @@
 export default {
     data() {
             return {
-                hunterPositionLeft:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 100)).toString() + "px",
+                hunterPositionLeft:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 150)).toString() + "px",
                 hunterPositionTop:Math.floor(Math.random() * Math.floor(window.innerHeight - 200)).toString() + "px",
 
-                hunterPositionRight2:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 100)).toString() + "px",
+                hunterPositionRight2:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 150)).toString() + "px",
                 hunterPositionTop2:Math.floor(Math.random() * Math.floor(window.innerHeight - 200)).toString() + "px",
 
-                survivorPositionRight:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 100)).toString() + "px",
+                survivorPositionRight:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 150)).toString() + "px",
                 survivorPositionTop:Math.floor(Math.random() * Math.floor(window.innerHeight - 200)).toString() + "px",
 
-                survivorPositionLeft2:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 100)).toString() + "px",
+                survivorPositionLeft2:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 150)).toString() + "px",
                 survivorPositionTop2:Math.floor(Math.random() * Math.floor(window.innerHeight - 200)).toString() + "px",
             }
         },

@@ -3,6 +3,14 @@ import StartGameButtonComponent from "./StartGameButton.vue";
 import TimerComponent from "./Timer.vue";
 import InputX from "./Xinput.vue";
 import InputY from "./Yinput.vue";
+import Stats from "./Stats.vue";
+
+defineProps({
+  timesWon: { //'Heading_Msg' is the variable name we to it in this example, and you can name it however you want
+    type: Number, // String, Number, Array, Object, Boolean
+    required: true
+  }
+});
 </script>
 
 <template>
@@ -11,14 +19,14 @@ import InputY from "./Yinput.vue";
     <div class="flex flex-col align-center justify-center the-height container">
         <div class="flex lower-res-screen">
 
-        <div class="flex">
-            <StartGameButtonComponent @click="startGame"/>
-            <TimerComponent :timer="timeUntilLose" />
-        </div>
-        <div class="flex">
-            <InputX @inputted="updateBoardCols" />
-            <InputY @inputted="updateBoardRows" />
-        </div>
+            <div class="flex">
+                <StartGameButtonComponent @click="startGame"/>
+                <TimerComponent :timer="timeUntilLose" />
+            </div>
+            <div class="flex">
+                <InputX @inputted="updateBoardCols" />
+                <InputY @inputted="updateBoardRows" />
+            </div>
 
 
         </div>
@@ -45,6 +53,9 @@ import InputY from "./Yinput.vue";
                 </div>
             </div>
         </div>
+        <div>
+            <Stats :timesWon="timesWon" />
+        </div>
     </div>
 </template>
 
@@ -53,7 +64,6 @@ import InputY from "./Yinput.vue";
 export default  {
     data() {
         return {
-            level:1,
             boardCols: 5,
             boardRows: 5,
             minBoardSize : 8,
@@ -271,6 +281,9 @@ export default  {
                     this.timeUntilLose -= 1;
 
                     if (this.isSuccess(x, y) || this.timeUntilLose === 0) {
+                        let timesWon = this.timesWon;
+                        timesWon ++;
+                        this.$emit('updateTimesWon', timesWon)
                         this.victory = true;
                         this.running = false;
                     }
