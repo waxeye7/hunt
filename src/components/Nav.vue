@@ -3,7 +3,8 @@ import randomWords from "random-words";
 </script>
 <template>
     <nav class="flex">
-        <router-link to="/" class="link-style center-vertical">
+        <router-link to="/" class="link-style center-vertical flex align-center">
+            <img class="nav-img" src="../assets/survivor.gif">
             <h1>Hunting Game</h1>
         </router-link>
 
@@ -13,6 +14,12 @@ import randomWords from "random-words";
 </template>
 
 <style scoped>
+
+.nav-img {
+    height:24px;
+    width:30px;
+    margin-right:4px;
+}
 .link-style {
     color:black;
     text-decoration: none;
@@ -22,7 +29,7 @@ nav {
     height:46px;
     background-color:rgb(230, 137, 255);
     cursor:default;
-    font-size: clamp(12px, 2vw, 16px);
+    font-size: clamp(10px, 2.4vw, 16px);
 }
 .center-vertical {
     margin:auto 0;
