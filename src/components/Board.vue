@@ -571,6 +571,12 @@ export default  {
         height: 40px;
         width: 40px;
     }
+    .active {
+        background-size:40px 40px;
+    }
+    .survivor-near {
+        background-size: 40px 40px;
+    }
     .lower-res-screen {
         flex-direction:column;
     }

@@ -1,5 +1,10 @@
+<script setup>
+import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+</script>
+
 <template>
-    <div class="container flex flex-col center">
+    <div class="container flex flex-col center relative">
+        <AbsoluteGuys />
         <p>enter ip address to connect</p>
         <div class="flex">
             <input v-bind="ip_address" type="text">

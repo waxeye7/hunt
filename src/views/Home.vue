@@ -1,11 +1,15 @@
+<script setup>
+import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+
+</script>
+
 <template>
     <div class="container relative">
+        <AbsoluteGuys />
         <div class="txt-block">
             <h1>Welcome To</h1>
             <h1>The Hunting Game!</h1>
         </div>
-
-
         <div class="links flex flex-col">
             <router-link to="/singleplayer" class="link-style">Singleplayer</router-link>
             <router-link to="/multiplayer" class="link-style">Multiplayer</router-link>
@@ -67,6 +71,16 @@
 
 <script>
     export default {
-        
+        data() {
+            return {
+
+            }
+        },
+        computed: {
+
+        },
+        created() {
+            // console.log(typeof(this.windowWidth))
+        }
     }
 </script>

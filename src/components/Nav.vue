@@ -19,6 +19,7 @@ import randomWords from "random-words";
     height:24px;
     width:30px;
     margin-right:4px;
+    margin-bottom:5px;
 }
 .link-style {
     color:black;

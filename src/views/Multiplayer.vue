@@ -1,5 +1,10 @@
+<script setup>
+import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+</script>
+
 <template>
     <div class="container relative">
+        <AbsoluteGuys />
         <div class="txt-block">
             <h1>Choose</h1>
             <h1>Create or Join</h1>

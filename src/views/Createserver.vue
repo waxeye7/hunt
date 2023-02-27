@@ -1,5 +1,10 @@
+<script setup>
+import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+</script>
+
 <template>
-    <div class="container center flex flex-col">
+    <div class="container center flex flex-col relative">
+        <AbsoluteGuys />
         <div class="flex flex-col center">
             <h1 class="margin-bottom-much">your address: <span>{{ address }}</span></h1>
             <h1 class="margin-bottom-tiny">Waiting for Opponent to join...</h1>
