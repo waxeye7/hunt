@@ -7,45 +7,45 @@ import InputY from "./Yinput.vue";
 
 <template>
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
-     <br><br>
-    <div class="flex flex-col align-center">
-    <div class="flex lower-res-screen">
+     
+    <div class="flex flex-col align-center justify-center the-height container">
+        <div class="flex lower-res-screen">
 
-    <div class="flex">
-        <StartGameButtonComponent @click="startGame"/>
-        <TimerComponent :timer="timeUntilLose" />
-    </div>
-    <div class="flex">
-        <InputX @inputted="updateBoardCols" />
-        <InputY @inputted="updateBoardRows" />
-    </div>
-
-
-    </div>
-
-
-
-    <div class="board relative">
-
-        <div v-if="victory" class="victory-popup">
-            <h1>congratulations you have won</h1>
+        <div class="flex">
+            <StartGameButtonComponent @click="startGame"/>
+            <TimerComponent :timer="timeUntilLose" />
+        </div>
+        <div class="flex">
+            <InputX @inputted="updateBoardCols" />
+            <InputY @inputted="updateBoardRows" />
         </div>
 
-        <div  v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
-            <div 
-                v-for="(col, colIdx) in row" 
-                :key="colIdx" 
-                :class="[
-                    'col', 
-                    squareClasses(col.pos.x, col.pos.y),
-                ]" 
-                @click="handleUserClicked(col.pos.x, col.pos.y)"
-            >
-                {{ `${col.pos.x}, ${col.pos.y}` }}
+
+        </div>
+
+
+
+        <div class="board relative">
+
+            <div v-if="victory" class="victory-popup">
+                <h1 class="vertical-center">Victory</h1>
+            </div>
+
+            <div  v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
+                <div 
+                    v-for="(col, colIdx) in row" 
+                    :key="colIdx" 
+                    :class="[
+                        'col', 
+                        squareClasses(col.pos.x, col.pos.y),
+                    ]" 
+                    @click="handleUserClicked(col.pos.x, col.pos.y)"
+                >
+                    {{ `${col.pos.x}, ${col.pos.y}` }}
+                </div>
             </div>
         </div>
     </div>
-</div>
 </template>
 
 
@@ -53,6 +53,7 @@ import InputY from "./Yinput.vue";
 export default  {
     data() {
         return {
+            level:1,
             boardCols: 5,
             boardRows: 5,
             minBoardSize : 8,
@@ -465,11 +466,11 @@ export default  {
 <style scoped>
 .flex { display:flex; }
 .flex-col { flex-direction:column; }
-.justify-center { justify-content:center; }
-.align-center { align-items:center; }
+/* .container { margin-top:100px; } */
+.the-height { height:calc(100vh - 46px) }
 .victory-popup {
     position:absolute;
-    color:rgb(255, 255, 255);background-color:rgba(0, 255, 64, 0.256);
+    color:rgb(255, 255, 255);
     top:50%;
     left:50%;
     transform: translate(-50%, -50%);
@@ -477,13 +478,16 @@ export default  {
     min-height:82px;
     z-index: 10;
     text-align: center;
-    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size:30px;
 }
 .lower-brightness {
-    filter: brightness(0.36);
+    filter: brightness(0.3);
 }
 .board {
-    padding: 48px;
+    padding:48px;
     background-color:rgb(88, 88, 88);
 }
 .row {
