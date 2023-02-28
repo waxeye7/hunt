@@ -20,7 +20,7 @@ defineProps({
         <div class="flex lower-res-screen">
 
             <div class="flex">
-                <StartGameButtonComponent @click="startGame"/>
+                <StartGameButtonComponent @click="startGame(); changeColSize();"/>
                 <TimerComponent :timer="timeUntilLose" />
             </div>
             <div class="flex">
@@ -34,7 +34,6 @@ defineProps({
 
 
         <div class="board relative">
-
             <div v-if="victory" class="victory-popup">
                 <h1 class="vertical-center">Victory</h1>
             </div>
@@ -53,6 +52,7 @@ defineProps({
                 </div>
             </div>
         </div>
+
         <div>
             <Stats :timesWon="timesWon" />
         </div>
@@ -64,6 +64,7 @@ defineProps({
 export default  {
     data() {
         return {
+            colSize: window.innerWidth/17 + "px",
             totalVisited: new Set(),
             boardCols: 5,
             boardRows: 5,
@@ -458,6 +459,15 @@ export default  {
         },
         updateBoardRows(value) {
             this.boardRows = value
+        },
+        changeColSize() {
+            if(this.boardCols >= this.boardRows) {
+                this.colSize = window.innerWidth/(this.boardCols+12) + "px";
+               
+            }
+            else {
+                this.colSize = window.innerWidth/(this.boardRows+12) + "px";
+            }
         }
     },
     
@@ -505,8 +515,8 @@ export default  {
     color:white;
     font-size:20px;
     margin: 1px;
-    height: 80px;
-    width: 80px;
+    height: v-bind(colSize);
+    width: v-bind(colSize);
 }
 .allowed {
     cursor: pointer;
