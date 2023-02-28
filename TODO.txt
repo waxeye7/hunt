@@ -1,3 +1,3 @@
-make board generator not make any islands
 make boxes grow and shrink based on how much screen space
 perhaps make hunter walk by two squares
+make survivor smarter, perhaps add pathfinder to it
