@@ -64,6 +64,7 @@ defineProps({
 export default  {
     data() {
         return {
+            totalVisited: new Set(),
             boardCols: 5,
             boardRows: 5,
             minBoardSize : 8,
@@ -112,7 +113,7 @@ export default  {
             }
             // console.log(this.boardObjs);
 
-            // this.checkSquaresInactiveDontMakeIsland();
+            this.checkSquaresInactiveDontMakeIsland();
 
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
@@ -137,39 +138,40 @@ export default  {
             this.hunter.pos = {x:0, y:0};
         },
         checkSquaresInactiveDontMakeIsland() {
+            this.totalVisited = new Set();
             for(let row of this.boardObjs) {
                 for(let square of row) {
-                    if(!square.terrain.active) {
-                        if(square.pos.x !== 0 && square.pos.y !== 0) {
-                            let isValidPath = this.bfs(this.boardObjs[0][0], square);
-                            if(!isValidPath && square.terrain.active) {
-                                console.log("removing", square.pos.x, square.pos.y)
-                                square.terrain.active = false;
-                            }
+                    if((square.pos.x !== 0 || square.pos.y !== 0) && !this.totalVisited.has(square.id)) {
+                        let isValidPath = this.bfs(this.boardObjs[0][0], square);
+                        if(!isValidPath && square.terrain.active) {
+                            console.log("removing", square.pos.x, square.pos.y)
+                            square.terrain.active = false;
+                        }
+                        if(isValidPath) {
+                            console.log("path found to", square.pos.x, square.pos.y)
                         }
                     }
                 }
             }
         },
         bfs(startNode, targetNode) {
-
             let visited = new Set();
             let queue = [startNode];
 
             while(queue.length > 0) {
                 let currentNode = queue.shift();  // Remove the first node from the queue
-    
+                visited.add(currentNode.id);
+
+
                 if (currentNode === targetNode) {
+                    this.totalVisited = new Set([...visited, ...this.totalVisited]);
                     return true;  // We've found the target node!
                 }
 
-                visited.add(currentNode.id);
-                console.log("queue", queue)
-                console.log("visited", visited)
 
 
                 let neighbours = this.findAdjacentTiles(currentNode);
-                console.log("neightbours", neighbours)
+                
                 // Add all unvisited neighbors to the queue
                 for(let neighbor of neighbours) {
                     if (!visited.has(neighbor.id)) {
@@ -177,22 +179,20 @@ export default  {
                     }
                 }
             }
+            this.totalVisited = new Set([...visited, ...this.totalVisited]);
             return false;   // We didn't find the target node
         },
         findAdjacentTiles(currentLocation) {
             let neighbours = [];
-            console.log(currentLocation)
-            if(currentLocation && currentLocation.pos && currentLocation.pos.x && currentLocation.pos.y) {
-                console.log(currentLocation)
+            if(currentLocation && currentLocation.pos) {
                 for(let i = -1; i <= 1; i++) {
                     for(let o = -1; o <= 1; o++) {
                         let x = i + currentLocation.pos.x;
                         let y = o + currentLocation.pos.y;
-                        if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation[0] || y !== currentLocation[1])) {
-                            console.log(x,y)
+                        if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation.pos.x || y !== currentLocation.pos.y)) {
                             if(this.boardObjs[y][x] && 
-                            this.boardObjs[y][x].terrain.active) {
-                                neighbours.push(x + "," + y)
+                            this.boardObjs[y][x].terrain.active && !this.totalVisited.has(this.boardObjs[y][x])) {
+                                neighbours.push(this.boardObjs[y][x])
                             }
                         }
                     }
@@ -204,7 +204,8 @@ export default  {
         createSquareObject(x, y, squareNumber) {
             let randomNum = Math.floor(Math.random() * 2);
             let active;
-            if(randomNum == 0 && (x !== 0 || y !== 0)) {
+            if(randomNum == 0 && (x !== 0 || y !== 0) && (x !== 0 || y !== 1) && (x !== 1 || y !== 0) && (x !== 1 || y !== 1)
+            && (x !== 2 || y !== 1) && (x !== 1 || y !== 2)) {
                 active = false;
             }
             else {
@@ -461,6 +462,7 @@ export default  {
     },
     
     created() {
+        // for(let i=0;i<10;i++)
         this.startGame()
     }
 }
