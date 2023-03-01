@@ -15,7 +15,7 @@ defineProps({
 
 <template>
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
-     
+
     <div class="flex flex-col align-center justify-center the-height container">
         <div class="flex lower-res-screen">
 
@@ -30,6 +30,7 @@ defineProps({
 
 
         </div>
+
 
 
 
@@ -70,6 +71,7 @@ export default  {
             boardRows: 5,
             minBoardSize : 8,
             boardObjs: [],
+            waterBoardPositions: [],
             running:false,
             victory:false,
             maxTrailLength: 3,
@@ -97,24 +99,53 @@ export default  {
     methods:{
         preGameReset() {
             this.boardObjs = [];
+            this.waterBoardPositions = [];
             let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
             let rowNum = 0;
             let squareNumber = 1;
             for(let row of boardList) {
                 let colNum = 0;
                 let rowList = [];
+                let waterRowList = [];
                 for(let squareInRow of row) {
-                    rowList.push(this.createSquareObject(colNum, rowNum, squareNumber));
-                    colNum += 1;
 
+                    rowList.push(this.createSquareObject(colNum, rowNum, squareNumber));
+
+
+                    if(colNum == 0 && rowNum == 0) {
+                        waterRowList.push({
+                            pos:{
+                                x:colNum,
+                                y:rowNum
+                            },
+                            water:false,
+                            id:2
+                        });
+                    }
+                    else {
+                        waterRowList.push(
+                        {
+                            pos:{
+                                x:colNum,
+                                y:rowNum
+                            },
+
+                            water:true,
+                            id:0
+                        });
+                    }
+
+
+                    colNum += 1;
                     squareNumber += 1;
                 }
                 rowNum += 1;
-                this.boardObjs.push(rowList)
+                this.boardObjs.push(rowList);
+                this.waterBoardPositions.push(waterRowList);
             }
             // console.log(this.boardObjs);
 
-            this.checkSquaresInactiveDontMakeIsland();
+            this.createPassableTiles();
 
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
@@ -125,9 +156,6 @@ export default  {
             this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
 
             while(this.survivor.pos.x == 0 && this.survivor.pos.y == 0 || 
-                this.survivor.pos.x == 0 && this.survivor.pos.y == 1 ||
-                this.survivor.pos.x == 1 && this.survivor.pos.y == 0 || 
-                this.survivor.pos.x == 1 && this.survivor.pos.y == 1 ||
                 !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
 
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
@@ -138,52 +166,75 @@ export default  {
             this.boardObjs[0][0].has_hunter = true;
             this.hunter.pos = {x:0, y:0};
         },
-        checkSquaresInactiveDontMakeIsland() {
-            this.totalVisited = new Set();
+        createPassableTiles() {
+            let more_tiles = true;
+            let currentNumber = 2;
+            let squaresChangedOnFirstRound = Infinity;
+            while(more_tiles) {
+                more_tiles = false;
+
+
+                let rowNum = 0;
+                for(let row of this.waterBoardPositions) {
+                    let colNum = 0;
+                    for(let col of row) {
+                        let square = row[colNum];
+                        if(row[colNum].id==currentNumber) {
+                            let neighbours = this.findAdjacentTiles(square, this.waterBoardPositions);
+                            let squaresChanged = 0;
+                            for(let n of neighbours) {
+                                let random = Math.floor(Math.random() * 4);
+                                if(random == 0 || random == 1 || random == 2) {
+                                    if(n.id == 0) {
+                                        squaresChanged ++;
+                                        n.water = false;
+                                        n.id = currentNumber + 1;
+                                        more_tiles = true;
+                                    }
+                                }
+                                else if(random == 3) {
+                                    if(n.id == 0) {
+                                        n.id = 1;
+                                    }
+                                }
+                            }
+                            if(currentNumber == 2 && squaresChanged == 0) {
+                                let random = Math.floor(Math.random() * 3);
+                                let chosen = neighbours[random];
+                                chosen.water = false;
+                                chosen.id = 3;
+                                more_tiles = true;
+                                squaresChangedOnFirstRound = 0;
+                            }
+                            if(currentNumber == 3 && squaresChanged == 0 && squaresChangedOnFirstRound == 0) {
+                                let random = Math.floor(Math.random() * 5);
+                                let chosen = neighbours[random];
+                                chosen.water = false;
+                                chosen.id = 4;
+                                more_tiles = true;
+                            }
+                        }
+                        colNum++;
+                    }
+                    rowNum++;
+
+                }
+                currentNumber ++;
+            }
+
+            let rowNum = 0;
             for(let row of this.boardObjs) {
-                for(let square of row) {
-                    if((square.pos.x !== 0 || square.pos.y !== 0) && !this.totalVisited.has(square.id)) {
-                        let isValidPath = this.bfs(this.boardObjs[0][0], square);
-                        if(!isValidPath && square.terrain.active) {
-                            console.log("removing", square.pos.x, square.pos.y)
-                            square.terrain.active = false;
-                        }
-                        if(isValidPath) {
-                            console.log("path found to", square.pos.x, square.pos.y)
-                        }
+                let colNum = 0;
+                for(let col of row) {
+                    if(this.waterBoardPositions[rowNum][colNum].water) {
+                        col.terrain.active = false;
                     }
+                    colNum++;
                 }
+                rowNum++;
             }
         },
-        bfs(startNode, targetNode) {
-            let visited = new Set();
-            let queue = [startNode];
-
-            while(queue.length > 0) {
-                let currentNode = queue.shift();  // Remove the first node from the queue
-                visited.add(currentNode.id);
-
-
-                if (currentNode === targetNode) {
-                    this.totalVisited = new Set([...visited, ...this.totalVisited]);
-                    return true;  // We've found the target node!
-                }
-
-
-
-                let neighbours = this.findAdjacentTiles(currentNode);
-                
-                // Add all unvisited neighbors to the queue
-                for(let neighbor of neighbours) {
-                    if (!visited.has(neighbor.id)) {
-                        queue.push(neighbor);
-                    }
-                }
-            }
-            this.totalVisited = new Set([...visited, ...this.totalVisited]);
-            return false;   // We didn't find the target node
-        },
-        findAdjacentTiles(currentLocation) {
+        findAdjacentTiles(currentLocation, listOfObjects) {
             let neighbours = [];
             if(currentLocation && currentLocation.pos) {
                 for(let i = -1; i <= 1; i++) {
@@ -191,9 +242,8 @@ export default  {
                         let x = i + currentLocation.pos.x;
                         let y = o + currentLocation.pos.y;
                         if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation.pos.x || y !== currentLocation.pos.y)) {
-                            if(this.boardObjs[y][x] && 
-                            this.boardObjs[y][x].terrain.active && !this.totalVisited.has(this.boardObjs[y][x])) {
-                                neighbours.push(this.boardObjs[y][x])
+                            if(listOfObjects[y][x]) {
+                                neighbours.push(listOfObjects[y][x])
                             }
                         }
                     }
@@ -203,11 +253,9 @@ export default  {
             return neighbours;
         },
         createSquareObject(x, y, squareNumber) {
-            let randomNum = Math.floor(Math.random() * 2);
             let active;
-            if(randomNum == 0 && (x !== 0 || y !== 0) && (x !== 0 || y !== 1) && (x !== 1 || y !== 0) && (x !== 1 || y !== 1)
-            && (x !== 2 || y !== 1) && (x !== 1 || y !== 2)) {
-                active = false;
+            if(x !== 0 || y !== 0) {
+                active = true;
             }
             else {
                 active = true;
