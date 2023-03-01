@@ -65,7 +65,7 @@ defineProps({
 export default  {
     data() {
         return {
-            colSize: window.innerWidth/17 + "px",
+            colSize: window.innerWidth/22 + "px",
             totalVisited: new Set(),
             boardCols: 5,
             boardRows: 5,
@@ -183,20 +183,41 @@ export default  {
                             let neighbours = this.findAdjacentTiles(square, this.waterBoardPositions);
                             let squaresChanged = 0;
                             for(let n of neighbours) {
-                                let random = Math.floor(Math.random() * 4);
-                                if(random == 0 || random == 1 || random == 2) {
-                                    if(n.id == 0) {
-                                        squaresChanged ++;
-                                        n.water = false;
-                                        n.id = currentNumber + 1;
-                                        more_tiles = true;
+                                let random;
+                                if(currentNumber <= 4) {
+                                    random = Math.floor(Math.random() * 5);
+                                    if(random == 0 || random == 1 || random == 2 || random == 3) {
+                                        if(n.id == 0) {
+                                            squaresChanged ++;
+                                            n.water = false;
+                                            n.id = currentNumber + 1;
+                                            more_tiles = true;
+                                        }
+                                    }
+                                    else if(random == 4) {
+                                        if(n.id == 0) {
+                                            n.id = 1;
+                                        }
                                     }
                                 }
-                                else if(random == 3) {
-                                    if(n.id == 0) {
-                                        n.id = 1;
+                                else {
+                                    random = Math.floor(Math.random() * 8);
+                                    if(random == 0 || random == 1 || random == 2 || random == 3) {
+                                        if(n.id == 0) {
+                                            squaresChanged ++;
+                                            n.water = false;
+                                            n.id = currentNumber + 1;
+                                            more_tiles = true;
+                                        }
+                                    }
+                                    else if(random == 4 || random == 5 || random == 6 || random == 7) {
+                                        if(n.id == 0) {
+                                            n.id = 1;
+                                        }
                                     }
                                 }
+                                
+
                             }
                             if(currentNumber == 2 && squaresChanged == 0) {
                                 let random = Math.floor(Math.random() * 3);
@@ -206,11 +227,29 @@ export default  {
                                 more_tiles = true;
                                 squaresChangedOnFirstRound = 0;
                             }
+
                             if(currentNumber == 3 && squaresChanged == 0 && squaresChangedOnFirstRound == 0) {
                                 let random = Math.floor(Math.random() * 5);
                                 let chosen = neighbours[random];
                                 chosen.water = false;
                                 chosen.id = 4;
+
+                                let random2 = Math.floor(Math.random() * 5);
+                                let chosen2 = neighbours[random2];
+                                chosen2.water = false;
+                                chosen2.id = 4;
+
+
+                                let random3 = Math.floor(Math.random() * 5);
+                                let chosen3 = neighbours[random3];
+                                chosen3.water = false;
+                                chosen3.id = 4;
+
+                                let random4 = Math.floor(Math.random() * 5);
+                                let chosen4 = neighbours[random4];
+                                chosen4.water = false;
+                                chosen4.id = 4;
+
                                 more_tiles = true;
                             }
                         }
@@ -510,17 +549,16 @@ export default  {
         },
         changeColSize() {
             if(this.boardCols >= this.boardRows) {
-                this.colSize = window.innerWidth/(this.boardCols+12) + "px";
+                this.colSize = window.innerWidth/(this.boardCols+17) + "px";
                
             }
             else {
-                this.colSize = window.innerWidth/(this.boardRows+12) + "px";
+                this.colSize = window.innerWidth/(this.boardRows+17) + "px";
             }
         }
     },
     
     created() {
-        // for(let i=0;i<10;i++)
         this.startGame()
     }
 }
@@ -531,7 +569,6 @@ export default  {
 <style scoped>
 .flex { display:flex; }
 .flex-col { flex-direction:column; }
-/* .container { margin-top:100px; } */
 .the-height { height:calc(100vh - 46px) }
 .victory-popup {
     position:absolute;
