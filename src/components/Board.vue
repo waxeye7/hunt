@@ -31,9 +31,6 @@ defineProps({
 
         </div>
 
-        <div style="color:white">
-            {{ waterBoardPositions }}
-        </div> 
 
 
 
@@ -102,6 +99,7 @@ export default  {
     methods:{
         preGameReset() {
             this.boardObjs = [];
+            this.waterBoardPositions = [];
             let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
             let rowNum = 0;
             let squareNumber = 1;
@@ -158,9 +156,6 @@ export default  {
             this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
 
             while(this.survivor.pos.x == 0 && this.survivor.pos.y == 0 || 
-                this.survivor.pos.x == 0 && this.survivor.pos.y == 1 ||
-                this.survivor.pos.x == 1 && this.survivor.pos.y == 0 || 
-                this.survivor.pos.x == 1 && this.survivor.pos.y == 1 ||
                 !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
 
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
@@ -173,6 +168,8 @@ export default  {
         },
         createPassableTiles() {
             let more_tiles = true;
+            let currentNumber = 2;
+            let squaresChangedOnFirstRound = Infinity;
             while(more_tiles) {
                 more_tiles = false;
 
@@ -182,16 +179,59 @@ export default  {
                     let colNum = 0;
                     for(let col of row) {
                         let square = row[colNum];
-                        if(row[colNum].id==2) {
+                        if(row[colNum].id==currentNumber) {
                             let neighbours = this.findAdjacentTiles(square, this.waterBoardPositions);
-                            neighbours[0].water = false;
+                            let squaresChanged = 0;
+                            for(let n of neighbours) {
+                                let random = Math.floor(Math.random() * 4);
+                                if(random == 0 || random == 1 || random == 2) {
+                                    if(n.id == 0) {
+                                        squaresChanged ++;
+                                        n.water = false;
+                                        n.id = currentNumber + 1;
+                                        more_tiles = true;
+                                    }
+                                }
+                                else if(random == 3) {
+                                    if(n.id == 0) {
+                                        n.id = 1;
+                                    }
+                                }
+                            }
+                            if(currentNumber == 2 && squaresChanged == 0) {
+                                let random = Math.floor(Math.random() * 3);
+                                let chosen = neighbours[random];
+                                chosen.water = false;
+                                chosen.id = 3;
+                                more_tiles = true;
+                                squaresChangedOnFirstRound = 0;
+                            }
+                            if(currentNumber == 3 && squaresChanged == 0 && squaresChangedOnFirstRound == 0) {
+                                let random = Math.floor(Math.random() * 5);
+                                let chosen = neighbours[random];
+                                chosen.water = false;
+                                chosen.id = 4;
+                                more_tiles = true;
+                            }
                         }
                         colNum++;
                     }
                     rowNum++;
 
                 }
+                currentNumber ++;
+            }
 
+            let rowNum = 0;
+            for(let row of this.boardObjs) {
+                let colNum = 0;
+                for(let col of row) {
+                    if(this.waterBoardPositions[rowNum][colNum].water) {
+                        col.terrain.active = false;
+                    }
+                    colNum++;
+                }
+                rowNum++;
             }
         },
         findAdjacentTiles(currentLocation, listOfObjects) {
