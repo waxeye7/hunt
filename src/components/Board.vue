@@ -30,7 +30,6 @@ defineProps({
             </div>
 
             <Waterchance @waterChanceChange="updateWaterChance"/>
-
         </div>
 
 
@@ -99,12 +98,25 @@ export default  {
         boardSize() {
             return this.boardCols * this.boardRows;
         },
+        colSizeDividedTwo() {
+            let number = Math.floor(parseInt(this.colSize.substring(0,this.colSize.length - 3) / 2));
+            return number;
+        }
     },
     methods:{
         preGameReset() {
             this.boardObjs = [];
             this.waterBoardPositions = [];
             let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
+            let index = 0;
+            for(let row of boardList) {
+                if(index % 2 == 1) {
+                    row.shift();
+                }
+                index ++;
+            }
+
+                
             let rowNum = 0;
             let squareNumber = 1;
             for(let row of boardList) {
@@ -113,36 +125,41 @@ export default  {
                 let waterRowList = [];
                 for(let squareInRow of row) {
 
-                    rowList.push(this.createSquareObject(colNum, rowNum, squareNumber));
+                    // if(rowNum % 2 !== 1 || colNum !== 0) {
+                        rowList.push(this.createSquareObject(colNum, rowNum, squareNumber, rowNum));
+                    // }
 
+                    // if(rowNum % 2 !== 1 || colNum !== 0) {
+                        if(colNum == this.startingSquare[0] && rowNum == this.startingSquare[1]) {
+                            waterRowList.push({
+                                pos:{
+                                    x:colNum,
+                                    y:rowNum
+                                },
+                                water:false,
+                                id:2
+                            });
+                        }
+                        else {
+                            waterRowList.push(
+                            {
+                                pos:{
+                                    x:colNum,
+                                    y:rowNum
+                                },
 
-                    if(colNum == this.startingSquare[0] && rowNum == this.startingSquare[1]) {
-                        waterRowList.push({
-                            pos:{
-                                x:colNum,
-                                y:rowNum
-                            },
-                            water:false,
-                            id:2
-                        });
-                    }
-                    else {
-                        waterRowList.push(
-                        {
-                            pos:{
-                                x:colNum,
-                                y:rowNum
-                            },
+                                water:true,
+                                id:0
+                            });
+                        }
+                    // }
 
-                            water:true,
-                            id:0
-                        });
-                    }
 
 
                     colNum += 1;
                     squareNumber += 1;
                 }
+
                 rowNum += 1;
                 this.boardObjs.push(rowList);
                 this.waterBoardPositions.push(waterRowList);
@@ -151,24 +168,30 @@ export default  {
 
             this.createPassableTiles();
 
+
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
             this.victory = false;
             this.running = true;
 
+
             this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
             this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
 
             while(this.survivor.pos.x == this.startingSquare[0] && this.survivor.pos.y == this.startingSquare[1] || 
-                !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
+                this.boardObjs[this.survivor.pos.y][this.survivor.pos.x] && !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
 
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
                 this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
             }
 
-            this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
+
+            if(this.boardObjs[this.survivor.pos.y][this.survivor.pos.x]) {
+                this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
+            }
             this.boardObjs[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
             this.hunter.pos = {x:this.startingSquare[0], y:this.startingSquare[1]};
+
         },
         createPassableTiles() {
             let more_tiles = true;
@@ -204,7 +227,7 @@ export default  {
                                     }
                                 }
                             if(currentNumber == 2 && squaresChanged == 0) {
-                                let random = Math.floor(Math.random() * 8);
+                                let random = Math.floor(Math.random() * 6);
                                 let chosen = neighbours[random];
                                 chosen.water = false;
                                 chosen.id = 3;
@@ -249,7 +272,7 @@ export default  {
 
             return neighbours;
         },
-        createSquareObject(x, y, squareNumber) {
+        createSquareObject(x, y, squareNumber, rowNum) {
             let square = {
                 id:squareNumber,
                 pos:{
@@ -267,6 +290,9 @@ export default  {
                 has_hunter:false,
                 has_survivor:false,
             };
+            if(rowNum % 2 == 1) {
+                square.offset = 1;
+            }
             return square;
         },
         timePassesUpdateSquareObjects() {
@@ -307,7 +333,9 @@ export default  {
                     clickedSquare.has_hunter = true;
 
                     this.timePassesUpdateSquareObjects();
-                    survivorSquare.survivor_trail.strength = 3;
+                    if(survivorSquare && survivorSquare.survivor_trail) {
+                        survivorSquare.survivor_trail.strength = 3;
+                    }
                     
                     this.timeUntilLose -= 1;
 
@@ -425,7 +453,7 @@ export default  {
                 // console.log(xMoves, yMoves)
 
                 let squareToGo = this.boardObjs[newY][newX]
-                if(!squareToGo.has_hunter && squareToGo.terrain.active) {
+                if(squareToGo && !squareToGo.has_hunter && squareToGo.terrain.active) {
                     allow = true;
                     this.survivor.pos.x = newX;
                     this.survivor.pos.y = newY;
@@ -461,6 +489,10 @@ export default  {
             const classes = [];
 
             let square = this.boardObjs[y][x];
+
+            if(square.offset && square.offset == 1) {
+                classes.push("offset-right")
+            }
 
             if(this.victory) {
                 classes.push("lower-brightness")
@@ -555,6 +587,9 @@ export default  {
     margin: 1px;
     height: v-bind(colSize);
     width: v-bind(colSize);
+}
+.offset-right {
+    transform: (v-bind(colSize), 0px);
 }
 .allowed {
     cursor: pointer;
