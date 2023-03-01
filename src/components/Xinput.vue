@@ -1,5 +1,5 @@
 <template>
-    <input v-model="x" @input="myChangeFunctionX()" class="input-board-dimensions" type="number" min="1" max="9" placeholder="X">
+    <input v-model="x" @input="myChangeFunctionX()" class="input-board-dimensions" type="number" min="3" max="9" placeholder="X">
 </template>
 
 <style scoped>
