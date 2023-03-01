@@ -173,7 +173,6 @@ export default  {
             while(more_tiles) {
                 more_tiles = false;
 
-
                 let rowNum = 0;
                 for(let row of this.waterBoardPositions) {
                     let colNum = 0;
