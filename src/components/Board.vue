@@ -4,6 +4,7 @@ import TimerComponent from "./Timer.vue";
 import InputX from "./Xinput.vue";
 import InputY from "./Yinput.vue";
 import Stats from "./Stats.vue";
+import Waterchance from "./Waterchance.vue";
 
 defineProps({
   timesWon: { //'Heading_Msg' is the variable name we to it in this example, and you can name it however you want
@@ -28,6 +29,7 @@ defineProps({
                 <InputY @inputted="updateBoardRows" />
             </div>
 
+            <Waterchance @waterChanceChange="updateWaterChance"/>
 
         </div>
 
@@ -65,11 +67,12 @@ defineProps({
 export default  {
     data() {
         return {
+            waterChance:50,
             colSize: window.innerWidth/22 + "px",
-            totalVisited: new Set(),
             boardCols: 5,
             boardRows: 5,
-            minBoardSize : 8,
+            minCols : 3,
+            minRows: 3,
             boardObjs: [],
             waterBoardPositions: [],
             running:false,
@@ -77,14 +80,12 @@ export default  {
             maxTrailLength: 3,
             hunter:{
                 pos:{
-                    x:0,
-                    y:0,
+
                 }
             },
             survivor:{
                 pos:{
-                    x: 0,
-                    y: 0,
+
                 },
                 trail: []
             },
@@ -92,6 +93,9 @@ export default  {
         }
     },
     computed: {
+        startingSquare() {
+            return [Math.floor(this.boardCols/2),Math.floor(this.boardRows/2)]
+        },
         boardSize() {
             return this.boardCols * this.boardRows;
         },
@@ -112,7 +116,7 @@ export default  {
                     rowList.push(this.createSquareObject(colNum, rowNum, squareNumber));
 
 
-                    if(colNum == 0 && rowNum == 0) {
+                    if(colNum == this.startingSquare[0] && rowNum == this.startingSquare[1]) {
                         waterRowList.push({
                             pos:{
                                 x:colNum,
@@ -155,7 +159,7 @@ export default  {
             this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
             this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
 
-            while(this.survivor.pos.x == 0 && this.survivor.pos.y == 0 || 
+            while(this.survivor.pos.x == this.startingSquare[0] && this.survivor.pos.y == this.startingSquare[1] || 
                 !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
 
                 this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
@@ -163,13 +167,12 @@ export default  {
             }
 
             this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
-            this.boardObjs[0][0].has_hunter = true;
-            this.hunter.pos = {x:0, y:0};
+            this.boardObjs[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
+            this.hunter.pos = {x:this.startingSquare[0], y:this.startingSquare[1]};
         },
         createPassableTiles() {
             let more_tiles = true;
             let currentNumber = 2;
-            let squaresChangedOnFirstRound = Infinity;
             while(more_tiles) {
                 more_tiles = false;
 
@@ -183,9 +186,15 @@ export default  {
                             let squaresChanged = 0;
                             for(let n of neighbours) {
                                 let random;
-                                if(currentNumber <= 4) {
-                                    random = Math.floor(Math.random() * 5);
-                                    if(random == 0 || random == 1 || random == 2 || random == 3) {
+                                    random = Math.floor(Math.random() * 10) + 1;
+                                    if(random <= Math.floor(this.waterChance/10)) {
+                                        // make water if random within chance of waterchance
+                                        if(n.id == 0) {
+                                            n.id = 1;
+                                        }
+                                    }
+                                    else {
+                                        // dont make water, random didn't hit
                                         if(n.id == 0) {
                                             squaresChanged ++;
                                             n.water = false;
@@ -193,62 +202,12 @@ export default  {
                                             more_tiles = true;
                                         }
                                     }
-                                    else if(random == 4) {
-                                        if(n.id == 0) {
-                                            n.id = 1;
-                                        }
-                                    }
                                 }
-                                else {
-                                    random = Math.floor(Math.random() * 8);
-                                    if(random == 0 || random == 1 || random == 2 || random == 3) {
-                                        if(n.id == 0) {
-                                            squaresChanged ++;
-                                            n.water = false;
-                                            n.id = currentNumber + 1;
-                                            more_tiles = true;
-                                        }
-                                    }
-                                    else if(random == 4 || random == 5 || random == 6 || random == 7) {
-                                        if(n.id == 0) {
-                                            n.id = 1;
-                                        }
-                                    }
-                                }
-                                
-
-                            }
                             if(currentNumber == 2 && squaresChanged == 0) {
-                                let random = Math.floor(Math.random() * 3);
+                                let random = Math.floor(Math.random() * 8);
                                 let chosen = neighbours[random];
                                 chosen.water = false;
                                 chosen.id = 3;
-                                more_tiles = true;
-                                squaresChangedOnFirstRound = 0;
-                            }
-
-                            if(currentNumber == 3 && squaresChanged == 0 && squaresChangedOnFirstRound == 0) {
-                                let random = Math.floor(Math.random() * 5);
-                                let chosen = neighbours[random];
-                                chosen.water = false;
-                                chosen.id = 4;
-
-                                let random2 = Math.floor(Math.random() * 5);
-                                let chosen2 = neighbours[random2];
-                                chosen2.water = false;
-                                chosen2.id = 4;
-
-
-                                let random3 = Math.floor(Math.random() * 5);
-                                let chosen3 = neighbours[random3];
-                                chosen3.water = false;
-                                chosen3.id = 4;
-
-                                let random4 = Math.floor(Math.random() * 5);
-                                let chosen4 = neighbours[random4];
-                                chosen4.water = false;
-                                chosen4.id = 4;
-
                                 more_tiles = true;
                             }
                         }
@@ -291,14 +250,6 @@ export default  {
             return neighbours;
         },
         createSquareObject(x, y, squareNumber) {
-            let active;
-            if(x !== 0 || y !== 0) {
-                active = true;
-            }
-            else {
-                active = true;
-            }
-
             let square = {
                 id:squareNumber,
                 pos:{
@@ -310,7 +261,7 @@ export default  {
                     show:true,
                 },
                 terrain:{
-                    active:active,
+                    active:true,
                     passable:true,
                 },
                 has_hunter:false,
@@ -335,7 +286,7 @@ export default  {
             }
         },
         startGame() {
-            if (this.boardSize >= this.minBoardSize) {
+            if (this.boardRows >= this.minRows && this.boardCols >= this.minCols) {
                 this.preGameReset();
             }
         },
@@ -546,6 +497,9 @@ export default  {
         updateBoardRows(value) {
             this.boardRows = value
         },
+        updateWaterChance(value) {
+            this.waterChance = value;
+        },
         changeColSize() {
             if(this.boardCols >= this.boardRows) {
                 this.colSize = window.innerWidth/(this.boardCols+17) + "px";
@@ -597,7 +551,7 @@ export default  {
 .col {
     background-color: rgb(105, 105, 105);
     color:white;
-    font-size:20px;
+    font-size:12px;
     margin: 1px;
     height: v-bind(colSize);
     width: v-bind(colSize);

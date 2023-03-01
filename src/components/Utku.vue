@@ -80,8 +80,8 @@
             for(let o=0; o<this.col_no; o++)
               this.map[i].push(0);
         }
-        this.map[0][0]=2;
-        this.tile_push(0,0)
+        this.map[Math.floor(this.row_no/2)][Math.floor(this.col_no/2)]=2;
+        this.tile_push(Math.floor(this.row_no/2),Math.floor(this.col_no/2))
       },
       tile_push(r,c){
         for(let i=-1;i<2;i++)

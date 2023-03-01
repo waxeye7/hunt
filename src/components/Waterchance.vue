@@ -1,5 +1,8 @@
 <template>
-    <input v-model="y" @input="myChangeFunctionY()" class="input-board-dimensions" type="number" min="3" max="9" placeholder="Y">
+    <div>
+        <h1 style="color:white; margin-bottom: 10px;">water chance</h1>
+        <input v-model="chance" @input="myChangeFunctionX()" class="input-board-dimensions" type="number" min="0" max="100" step="10" placeholder="X">
+    </div>
 </template>
 
 <style scoped>
@@ -12,7 +15,7 @@
     height:fit-content;
     border-radius: 4px;
     padding:10px;
-    width:70px;
+    width:80px;
     cursor: default;
 }
 </style>
@@ -22,13 +25,13 @@
 export default  {
     data() {
         return {
-            y:5
+            chance:50
         }
     },
 
     methods:{
-        myChangeFunctionY() {
-            this.$emit('inputted', this.y)
+        myChangeFunctionX() {
+            this.$emit('waterChanceChange', this.chance)
         },
     },
 
