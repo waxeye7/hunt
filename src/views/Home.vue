@@ -9,6 +9,8 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
         <div class="txt-block">
             <h1>Welcome To</h1>
             <h1>The Hunting Game!</h1>
+            <h1>{{ pageviews_count }}</h1>
+            <h1>{{ visits_count }}</h1>
         </div>
         <div class="links flex flex-col">
             <router-link to="/singleplayer" class="link-style">Singleplayer</router-link>
@@ -73,14 +75,32 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     export default {
         data() {
             return {
-
+                pageviews_count:0,
+                visits_count:0
             }
         },
         computed: {
 
         },
+        methods: {
+            updateCounter(type) {
+                fetch('http://127.0.0.1:3002/api?'+type)
+                .then(res => res.json())
+                .then(data => {
+                    this.pageviews_count = data.pageviews;
+                    this.visits_count = data.visits;
+                })
+            }
+        },
         created() {
-            // console.log(typeof(this.windowWidth))
+
+            if(sessionStorage.getItem('visit') === null) {
+                this.updateCounter('type=visit-pageview');
+            }
+            else {
+                this.updateCounter('type=pageview');
+            }
+            sessionStorage.setItem('visit', 'x');
         }
     }
 </script>
