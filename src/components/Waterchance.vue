@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h1 style="color:white; margin-bottom: 10px;">water chance</h1>
         <input v-model="chance" @input="myChangeFunctionX()" class="input-board-dimensions" type="number" min="0" max="100" step="10" placeholder="X">
     </div>
 </template>

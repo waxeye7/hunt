@@ -5,12 +5,13 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
 
 <template>
     <div class="container relative">
+        <h1>pageviews: {{ pageviews_count }}</h1>
+        <h1>visits: {{ visits_count }}</h1>
         <AbsoluteGuys />
         <div class="txt-block">
             <h1>Welcome To</h1>
             <h1>The Hunting Game!</h1>
-            <h1>{{ pageviews_count }}</h1>
-            <h1>{{ visits_count }}</h1>
+
         </div>
         <div class="links flex flex-col">
             <router-link to="/singleplayer" class="link-style">Singleplayer</router-link>
@@ -101,6 +102,7 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
                 this.updateCounter('type=pageview');
             }
             sessionStorage.setItem('visit', 'x');
+            
         }
     }
 </script>

@@ -17,7 +17,7 @@ defineProps({
 <template>
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
 
-    <div class="flex flex-col align-center justify-center the-height container">
+    <div class="flex flex-col align-center justify-center the-height">
         <div class="flex lower-res-screen">
 
             <div class="flex">
@@ -27,9 +27,11 @@ defineProps({
             <div class="flex">
                 <InputX @inputted="updateBoardCols" />
                 <InputY @inputted="updateBoardRows" />
+
+                <Waterchance @waterChanceChange="updateWaterChance"/>
             </div>
 
-            <Waterchance @waterChanceChange="updateWaterChance"/>
+            
 
         </div>
 
@@ -41,17 +43,17 @@ defineProps({
                 <h1 class="vertical-center">Victory</h1>
             </div>
 
-            <div  v-for="(row, rowIdx) in boardObjs" :key="rowIdx" class="row">
+            <div  v-for="(row, rowIdx) in boardObjs" :class="{'marginLeftBasedOnSquareSize':rowIdx % 2 == 1}" :key="rowIdx" class="row">
                 <div 
                     v-for="(col, colIdx) in row" 
                     :key="colIdx" 
                     :class="[
-                        'col', 
+                        'hex', 
                         squareClasses(col.pos.x, col.pos.y),
                     ]" 
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
                 >
-                    {{ `${col.pos.x}, ${col.pos.y}` }}
+                    <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
                 </div>
             </div>
         </div>
@@ -68,7 +70,7 @@ export default  {
     data() {
         return {
             waterChance:50,
-            colSize: window.innerWidth/22 + "px",
+            colSize: window.innerWidth/25 + "px",
             boardCols: 5,
             boardRows: 5,
             minCols : 3,
@@ -502,11 +504,11 @@ export default  {
         },
         changeColSize() {
             if(this.boardCols >= this.boardRows) {
-                this.colSize = window.innerWidth/(this.boardCols+17) + "px";
+                this.colSize = window.innerWidth/(this.boardCols+20) + "px";
                
             }
             else {
-                this.colSize = window.innerWidth/(this.boardRows+17) + "px";
+                this.colSize = window.innerWidth/(this.boardRows+20) + "px";
             }
         }
     },
@@ -522,7 +524,7 @@ export default  {
 <style scoped>
 .flex { display:flex; }
 .flex-col { flex-direction:column; }
-.the-height { height:calc(100vh - 46px) }
+.the-height { min-height:calc(100vh - 46px) }
 .victory-popup {
     position:absolute;
     color:rgb(255, 255, 255);
@@ -552,9 +554,41 @@ export default  {
     background-color: rgb(105, 105, 105);
     color:white;
     font-size:12px;
-    margin: 1px;
+    margin: 0px;
     height: v-bind(colSize);
     width: v-bind(colSize);
+}
+.marginLeftBasedOnSquareSize {
+    /* margin-left:calc(v-bind(colSize)/2); */
+    margin-left: 52px;
+    /* margin-top:calc(v-bind(colSize)) */
+}
+.hex:before {
+    content: " ";
+    width: 0; height: 0;
+    border-bottom: 31px solid rgb(123, 123, 123);
+    border-left: 52px solid transparent;
+    border-right: 52px solid transparent;
+    position: absolute;
+    top: -30px;
+}
+
+.hex {
+    margin-top: 32px;
+    width: 104px;
+    height: 60px;
+    background-color: rgb(123, 123, 123);
+    position: relative;
+}
+
+.hex:after {
+    content: "";
+    width: 0;
+    position: absolute;
+    bottom: -30px;
+    border-top: 30px solid rgb(123, 123, 123);
+    border-left: 52px solid transparent;
+    border-right: 52px solid transparent;
 }
 .allowed {
     cursor: pointer;
@@ -567,10 +601,9 @@ export default  {
     cursor: not-allowed;
 }
 .inactive-square {
-    background-color:rgb(10, 26, 255) !important;
-    color:rgb(10, 26, 255);
     cursor:default;
-    background-image: url("../assets/water.jpg") !important;
+    background-color: rgb(7, 7, 130);
+    /* background-image: url("../assets/water.jpg") !important; */
     background-size:cover;
     background-repeat: no-repeat;
     background-position:center;
@@ -583,9 +616,10 @@ export default  {
     background-repeat: no-repeat;
     cursor: default !important;
 }
+
 .active:hover {
     outline:none !important;
-    background-color:rgb(105, 105, 105) !important; 
+    /* background-color:rgb(105, 105, 105) !important;  */
 }
 .success {
     background-image: url("../assets/won.png") !important;
@@ -618,6 +652,8 @@ export default  {
     background-position:center;
     background-repeat: no-repeat;
 }
+
+
 
 @media only screen and (max-width: 600px) {
     .col {
