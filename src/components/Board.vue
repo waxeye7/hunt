@@ -53,7 +53,7 @@ defineProps({
                     ]" 
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
                 >
-                    {{ `${col.pos.x}, ${col.pos.y}` }}
+                    <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
                 </div>
             </div>
         </div>
@@ -387,7 +387,7 @@ export default  {
             if(Math.abs(hunterX - x) <= range && Math.abs(hunterY - y) <= range) {
                 if(hunterY % 2 == 0 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x > hunterX ||
                    hunterY % 2 == 1 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x < hunterX) {
-                    console.log('worked')
+                    console.log('worked');
                     return false;
                 }
                 return true;
@@ -462,11 +462,12 @@ export default  {
 
                 let squareToGo = this.boardObjs[newY][newX]
                 if(!squareToGo.has_hunter && squareToGo.terrain.active) {
-                    if(squareToGo)
-                    allow = true;
-                    this.survivor.pos.x = newX;
-                    this.survivor.pos.y = newY;
-                    squareToGo.has_survivor = true;
+                    if(this.checkIfNearbyToSurvivor(newX, newY)) {
+                        allow = true;
+                        this.survivor.pos.x = newX;
+                        this.survivor.pos.y = newY;
+                        squareToGo.has_survivor = true;
+                    }
                 }
             }
 
@@ -599,21 +600,20 @@ export default  {
     /* margin-top:calc(v-bind(colSize)) */
 }
 .hex:before {
-    content: "";
+    content: " ";
     width: 0; height: 0;
-    border-bottom: 31px solid rgb(123, 123, 123);
+    border-bottom: 30px solid rgb(145, 145, 145);
     border-left: 52px solid transparent;
     border-right: 52px solid transparent;
     position: absolute;
     top: -30px;
 }
 
-
 .hex {
-    margin-top: 32px;
+    margin-top: 30px;
     width: 104px;
-    height: 60px;
-    background-color: rgb(123, 123, 123);
+    height: 58px;
+    background-color: rgb(145, 145, 145);
     position: relative;
 }
 
@@ -622,7 +622,7 @@ export default  {
     width: 0;
     position: absolute;
     bottom: -30px;
-    border-top: 30px solid rgb(123, 123, 123);
+    border-top: 30px solid rgb(145, 145, 145);
     border-left: 52px solid transparent;
     border-right: 52px solid transparent;
 }
@@ -637,28 +637,24 @@ export default  {
     cursor: not-allowed;
 }
 .inactive-square::before {
-    border-image-outset: 0px;
+    /* border-image-outset: 0px; */
 
-    border-image: url("../assets/water.jpg");
-    /* background-color: rgb(255, 0, 0); */
-    /* background-image: url("../assets/water.jpg") !important;
-    background-size:cover;
-    background-repeat: no-repeat;
-    background-position:center; */
+    /* border-image: url("../assets/water.jpg"); */
+    border-bottom-color: rgb(255, 0, 0);
 }
 .inactive-square {
     cursor:default;
-    /* background-color: rgb(7, 7, 130); */
-    background-image: url("../assets/water.jpg") !important;
+    background-color: rgb(255, 0, 0);
+    /* background-image: url("../assets/water.jpg") !important; */
     background-size:cover;
     background-repeat: no-repeat;
     background-position:center;
     /* visibility: hidden; */
 }
 .inactive-square::after {
-    border-image: url("../assets/water.jpg");
-    border-image-outset: 0px;
-
+    border-top-color: rgb(255, 0, 0);
+    /* border-image: url("../assets/water.jpg"); */
+    /* border-bottom:0 */
     /* background-color: rgb(255, 0, 0); */
 
     /* background-image: url("../assets/water.jpg") !important;
