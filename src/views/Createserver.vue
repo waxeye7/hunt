@@ -1,4 +1,5 @@
 <script setup>
+// import randomWords from "random-words";
 import AbsoluteGuys from "../components/AbsoluteGuys.vue";
 </script>
 
@@ -11,7 +12,6 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
             <img src="../assets/mr-bean-waiting.gif" alt="">
             <div class="much-padding-bottom"></div>
         </div>
-
     </div>
 </template>
 

@@ -4,9 +4,9 @@ const cors = require('cors');
 const fs = require('fs');
 const mongoose = require('mongoose');
 require('dotenv').config();
-const Visit = require('./visit.js');
-const PageView = require('./page_view.js');
-const Win = require('./win.js');
+const Visit = require('./models/visit.js');
+const PageView = require('./models/page_view.js');
+const Win = require('./models/win.js');
 
 app.use(cors());
 

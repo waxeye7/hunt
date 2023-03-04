@@ -53,7 +53,7 @@ defineProps({
                     ]" 
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
                 >
-                    <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
+                    {{ `${col.pos.x}, ${col.pos.y}` }}
                 </div>
             </div>
         </div>
@@ -206,7 +206,7 @@ export default  {
                                     }
                                 }
                             if(currentNumber == 2 && squaresChanged == 0) {
-                                let random = Math.floor(Math.random() * 8);
+                                let random = Math.floor(Math.random() * 6);
                                 let chosen = neighbours[random];
                                 chosen.water = false;
                                 chosen.id = 3;
@@ -242,7 +242,13 @@ export default  {
                         let y = o + currentLocation.pos.y;
                         if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation.pos.x || y !== currentLocation.pos.y)) {
                             if(listOfObjects[y][x]) {
-                                neighbours.push(listOfObjects[y][x])
+                                if(currentLocation.pos.y % 2 == 0 && (currentLocation.pos.x + 1 == x && (currentLocation.pos.y - 1 == y || currentLocation.pos.y + 1 == y)) ||
+                                   currentLocation.pos.y % 2 == 1 && (currentLocation.pos.x - 1 == x && (currentLocation.pos.y - 1 == y || currentLocation.pos.y + 1 == y))) {
+
+                                }
+                                else {
+                                    neighbours.push(listOfObjects[y][x]);
+                                }
                             }
                         }
                     }
@@ -337,6 +343,15 @@ export default  {
         checkIfNearbyToSurvivor(x, y) {
             if((x == this.survivor.pos.x || x-1 == this.survivor.pos.x || x+1 == this.survivor.pos.x) && 
             (y == this.survivor.pos.y || y-1 == this.survivor.pos.y || y+1 == this.survivor.pos.y)) {
+
+                if(this.survivor.pos.y % 2 == 0 && (this.survivor.pos.x + 1 == x && (this.survivor.pos.y - 1 == y || this.survivor.pos.y + 1 == y)) ||
+                this.survivor.pos.y % 2 == 1 && (this.survivor.pos.x - 1 == x && (this.survivor.pos.y - 1 == y || this.survivor.pos.y + 1 == y))) {
+
+                    return false;
+
+                }
+
+
                 return true
             }
             else {
@@ -344,8 +359,21 @@ export default  {
             }
         },
         checkIfNearbyToHunter(x, y) {
+
+
             if((x == this.hunter.pos.x || x-1 == this.hunter.pos.x || x+1 == this.hunter.pos.x) && 
-            (y == this.hunter.pos.y || y-1 == this.hunter.pos.y || y+1 == this.hunter.pos.y)) {
+                (y == this.hunter.pos.y || y-1 == this.hunter.pos.y || y+1 == this.hunter.pos.y)) {
+
+
+
+                if(this.hunter.pos.y % 2 == 0 && (this.hunter.pos.x + 1 == x && (this.hunter.pos.y - 1 == y || this.hunter.pos.y + 1 == y)) ||
+                this.hunter.pos.y % 2 == 1 && (this.hunter.pos.x - 1 == x && (this.hunter.pos.y - 1 == y || this.hunter.pos.y + 1 == y))) {
+
+                    return false;
+
+                }
+
+
                 return true
             }
             else {
@@ -353,10 +381,16 @@ export default  {
             }
         },
         checkIfRangeXToHunter(x, y, range) {
+
             let hunterX = this.hunter.pos.x;
             let hunterY = this.hunter.pos.y;
             if(Math.abs(hunterX - x) <= range && Math.abs(hunterY - y) <= range) {
-                return true
+                if(hunterY % 2 == 0 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x > hunterX ||
+                   hunterY % 2 == 1 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x < hunterX) {
+                    console.log('worked')
+                    return false;
+                }
+                return true;
             }
             else {
                 return false;
@@ -428,6 +462,7 @@ export default  {
 
                 let squareToGo = this.boardObjs[newY][newX]
                 if(!squareToGo.has_hunter && squareToGo.terrain.active) {
+                    if(squareToGo)
                     allow = true;
                     this.survivor.pos.x = newX;
                     this.survivor.pos.y = newY;
@@ -447,12 +482,12 @@ export default  {
         },
         survivorRangeX(x, y, range) {
             let square = this.boardObjs[y][x];
-          if(square.has_survivor && this.checkIfRangeXToHunter(x, y, range)) {
-            return true;
-          }
-          else {
-            return false;
-          }
+            if(square.has_survivor && this.checkIfRangeXToHunter(x, y, range)) {
+                return true;
+            }
+            else {
+                return false;
+            }
         },
         trailClass(x, y, square) {
             if(square.survivor_trail.strength > 0 && square.survivor_trail.show && this.checkIfRangeXToHunter(x, y, 2)) {
@@ -564,7 +599,7 @@ export default  {
     /* margin-top:calc(v-bind(colSize)) */
 }
 .hex:before {
-    content: " ";
+    content: "";
     width: 0; height: 0;
     border-bottom: 31px solid rgb(123, 123, 123);
     border-left: 52px solid transparent;
@@ -572,6 +607,7 @@ export default  {
     position: absolute;
     top: -30px;
 }
+
 
 .hex {
     margin-top: 32px;
@@ -600,14 +636,35 @@ export default  {
 .not-allowed {
     cursor: not-allowed;
 }
+.inactive-square::before {
+    border-image-outset: 0px;
+
+    border-image: url("../assets/water.jpg");
+    /* background-color: rgb(255, 0, 0); */
+    /* background-image: url("../assets/water.jpg") !important;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position:center; */
+}
 .inactive-square {
     cursor:default;
-    background-color: rgb(7, 7, 130);
-    /* background-image: url("../assets/water.jpg") !important; */
+    /* background-color: rgb(7, 7, 130); */
+    background-image: url("../assets/water.jpg") !important;
     background-size:cover;
     background-repeat: no-repeat;
     background-position:center;
     /* visibility: hidden; */
+}
+.inactive-square::after {
+    border-image: url("../assets/water.jpg");
+    border-image-outset: 0px;
+
+    /* background-color: rgb(255, 0, 0); */
+
+    /* background-image: url("../assets/water.jpg") !important;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position:center; */
 }
 .active {
     background-image: url("../assets/hunt.webp") !important;
