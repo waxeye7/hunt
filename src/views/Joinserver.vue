@@ -1,19 +1,44 @@
 <script setup>
 import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+import { getGameByCode, updateGameByCode } from "../utils/realm";
 </script>
 
 <template>
     <div class="container flex flex-col center relative">
         <AbsoluteGuys />
-        <p>enter ip address to connect</p>
-        <div class="flex">
-            <input v-bind="ip_address" type="text">
-            <div class="go">Go</div>
+        <div v-if="!hasJoined">
+            <p>ENTER THE GAME CODE</p>
+            <div class="flex">
+                <input v-model="gameCode" type="text">
+                <button class="go" @click="joinGame">Go</button>
+            </div>
+            <h1>{{ gameCode }}</h1>
         </div>
-        <h1>{{ ip_address }}</h1>
+        <div v-else>YOU HAVE SUCCESSFULLY JOINED</div>
         
     </div>
 </template>
+
+<script>
+    export default {
+        data() {
+            return {
+                gameCode: "",
+                hasJoined: false,
+            }
+        },
+        methods: {
+            async joinGame() {
+                const game = await getGameByCode(this.gameCode);
+                console.log({game});
+                const updateParams = game.hunter.has_connected ? {"survivor.has_connected": true} : {"hunter.has_connected": true};
+                console.log({game}, {updateParams})
+                await updateGameByCode(this.gameCode, updateParams);
+                this.hasJoined = true;
+            }
+        }
+    }
+</script>
 
 <style scoped>
 .go {
@@ -34,13 +59,3 @@ p{
     align-items: center;
 }
 </style>
-
-<script>
-    export default {
-        data() {
-            return {
-                ip_address:""
-            }
-        }
-    }
-</script>
