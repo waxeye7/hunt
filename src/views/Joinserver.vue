@@ -1,6 +1,9 @@
 <script setup>
 import AbsoluteGuys from "../components/AbsoluteGuys.vue";
-import { getGameByCode, updateGameByCode } from "../utils/realm";
+import { mapStores } from 'pinia'
+import { useAuthStore } from "../stores/auth";
+import { useGameStore } from "../stores/game";
+import router from "../router";
 </script>
 
 <template>
@@ -27,16 +30,21 @@ import { getGameByCode, updateGameByCode } from "../utils/realm";
                 hasJoined: false,
             }
         },
+        computed: {
+            ...mapStores(useAuthStore, useGameStore)
+        },
         methods: {
             async joinGame() {
-                const game = await getGameByCode(this.gameCode);
-                console.log({game});
-                const updateParams = game.hunter.has_connected ? {"survivor.has_connected": true} : {"hunter.has_connected": true};
-                console.log({game}, {updateParams})
-                await updateGameByCode(this.gameCode, updateParams);
-                this.hasJoined = true;
+                await this.authStore.init();
+                await this.gameStore.getGameByCode(this.gameCode);
+                const playerType = this.gameStore.hunter.has_connected ? "survivor" : "hunter";
+                this.gameStore.currentPlayerType = playerType;
+                const updateParams = this.gameStore.hunter.has_connected ? {"survivor.has_connected": true} : {"hunter.has_connected": true};
+                await this.gameStore.updateGameByCode(this.gameCode, updateParams);
+                await this.gameStore.syncGame();
+                router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
             }
-        }
+        },
     }
 </script>
 

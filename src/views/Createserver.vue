@@ -1,7 +1,10 @@
 <script setup>
 import randomWords from "random-words";
 import AbsoluteGuys from "../components/AbsoluteGuys.vue";
-import { createGame, getGames } from "../utils/realm";
+import { mapStores } from 'pinia'
+import { useAuthStore } from "../stores/auth";
+import { useGameStore } from "../stores/game";
+import router from "../router";
 </script>
 
 <template>
@@ -40,15 +43,20 @@ import { createGame, getGames } from "../utils/realm";
                 bothConnected: false,
             }
         },
+        computed: {
+            ...mapStores(useAuthStore, useGameStore)
+        },
         methods: {
             async create() {
+                await this.authStore.init();
                 this.gameCode = randomWords(3).join("-");
-                console.log('creating');
-                const game = await createGame(this.playerType, this.gameCode);
-                console.log(game)
+
+                this.gameStore.currentPlayerType = this.playerType;
+                await this.gameStore.createGame(this.playerType, this.gameCode);
+                await this.gameStore.getGameByCode(this.gameCode);
                 this.created = true;
 
-                const games = await getGames();
+                const games = await this.gameStore.getGames();
                 for await (const change of games.watch({
                     filter: {
                         operationType: "update",
@@ -60,6 +68,8 @@ import { createGame, getGames } from "../utils/realm";
                     const { hunter, survivor } = fullDocument;
                     if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
                         this.bothConnected = true;
+                        await this.gameStore.syncGame();
+                        router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
                     }
                 }
             }

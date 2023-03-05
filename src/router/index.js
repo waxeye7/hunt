@@ -5,6 +5,7 @@ import Singleplayer from "../views/Singleplayer.vue";
 import Multiplayer from "../views/Multiplayer.vue";
 import Createserver from "../views/Createserver.vue";
 import Joinserver from "../views/Joinserver.vue";
+import MultiplayerGame from "../views/MultiplayerGame.vue";
 
 const routes = [
     {
@@ -31,7 +32,12 @@ const routes = [
         path:'/multiplayer/join',
         name:'Join',
         component: Joinserver
-    }
+    },
+    {
+        path:'/multiplayer/play/:id',
+        name:'play',
+        component: MultiplayerGame
+    },
 ];
 
 const router = createRouter({
