@@ -41,7 +41,7 @@ import router from "../router";
                 this.gameStore.currentPlayerType = playerType;
                 const updateParams = this.gameStore.hunter.has_connected ? {"survivor.has_connected": true} : {"hunter.has_connected": true};
                 await this.gameStore.updateGameByCode(this.gameCode, updateParams);
-                await this.gameStore.syncGame();
+                await this.gameStore.getGameByCode(this.gameCode);
                 router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
             }
         },

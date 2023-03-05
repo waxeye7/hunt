@@ -68,7 +68,7 @@ import router from "../router";
                     const { hunter, survivor } = fullDocument;
                     if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
                         this.bothConnected = true;
-                        await this.gameStore.syncGame();
+                        await this.gameStore.getGameByCode(this.gameCode);
                         router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
                     }
                 }
