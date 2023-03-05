@@ -1,4 +1,5 @@
 <script setup>
+import 'animate.css';
 import StartGameButtonComponent from "./StartGameButton.vue";
 import TimerComponent from "./Timer.vue";
 import InputX from "./Xinput.vue";
@@ -48,7 +49,7 @@ defineProps({
                     v-for="(col, colIdx) in row" 
                     :key="colIdx" 
                     :class="[
-                        'hex', 
+                        'hex animate__animated animate__zoomIn', 
                         squareClasses(col.pos.x, col.pos.y),
                     ]" 
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
@@ -599,75 +600,52 @@ export default  {
     margin-left: 52px;
     /* margin-top:calc(v-bind(colSize)) */
 }
-.hex:before {
-    content: " ";
-    width: 0; height: 0;
-    border-bottom: 30px solid rgb(145, 145, 145);
-    border-left: 52px solid transparent;
-    border-right: 52px solid transparent;
-    position: absolute;
-    top: -30px;
-}
+
 
 .hex {
-    margin-top: 30px;
-    width: 104px;
-    height: 58px;
+    /* transition:0.225s all; */
+    margin-top: -26px;
+    width: 100px;
+    height: 100px;
     background-color: rgb(145, 145, 145);
     position: relative;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+
 }
 
-.hex:after {
-    content: "";
-    width: 0;
-    position: absolute;
-    bottom: -30px;
-    border-top: 30px solid rgb(145, 145, 145);
-    border-left: 52px solid transparent;
-    border-right: 52px solid transparent;
-}
 .allowed {
     cursor: pointer;
 }
 .allowed:hover {
-    border-radius:2px;
-    outline:2px white solid;
+    background-color: rgb(167, 167, 167);
+    transform: scale(1.05);
+    z-index: 2;
+
 }
 .not-allowed {
     cursor: not-allowed;
 }
-.inactive-square::before {
-    /* border-image-outset: 0px; */
 
-    /* border-image: url("../assets/water.jpg"); */
-    border-bottom-color: rgb(255, 0, 0);
-}
 .inactive-square {
     cursor:default;
-    background-color: rgb(255, 0, 0);
-    /* background-image: url("../assets/water.jpg") !important; */
+    /* background-color: rgb(255, 0, 0); */
+    /* clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); */
+    background-image: url("../assets/water.jpg") !important;
     background-size:cover;
     background-repeat: no-repeat;
     background-position:center;
     /* visibility: hidden; */
 }
-.inactive-square::after {
-    border-top-color: rgb(255, 0, 0);
-    /* border-image: url("../assets/water.jpg"); */
-    /* border-bottom:0 */
-    /* background-color: rgb(255, 0, 0); */
 
-    /* background-image: url("../assets/water.jpg") !important;
-    background-size:cover;
-    background-repeat: no-repeat;
-    background-position:center; */
-}
 .active {
+    background-color: rgb(145, 145, 145) !important;
     background-image: url("../assets/hunt.webp") !important;
     background-size:70px 70px;
     background-position:center;
     background-repeat: no-repeat;
     cursor: default !important;
+    filter: brightness(1) !important;
+    transform: scale(1) !important;
 }
 
 .active:hover {
