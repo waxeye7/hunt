@@ -1,6 +1,7 @@
 <script setup>
 import Utku from "./components/Utku.vue";
 import Nav from "./components/Nav.vue";
+import MultiplayerBoard from "./components/MultiplayerBoard.vue";
 </script>
 <template>
 
@@ -8,6 +9,7 @@ import Nav from "./components/Nav.vue";
 
   <Nav />
   <router-view></router-view>
+  <!-- <MultiplayerBoard /> -->
 
 
 </template>

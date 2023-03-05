@@ -37,6 +37,7 @@ import router from "../router";
             async joinGame() {
                 await this.authStore.init();
                 await this.gameStore.getGameByCode(this.gameCode);
+                console.log(this.gameStore.game)
                 const playerType = this.gameStore.hunter.has_connected ? "survivor" : "hunter";
                 this.gameStore.currentPlayerType = playerType;
                 const updateParams = this.gameStore.hunter.has_connected ? {"survivor.has_connected": true} : {"hunter.has_connected": true};

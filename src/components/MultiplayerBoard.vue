@@ -7,38 +7,17 @@ import InputY from "./Yinput.vue";
 import Stats from "./Stats.vue";
 import Waterchance from "./Waterchance.vue";
 
-defineProps({
-  timesWon: { //'Heading_Msg' is the variable name we to it in this example, and you can name it however you want
-    type: Number, // String, Number, Array, Object, Boolean
-    required: true
-  }
-});
 </script>
 
 <template>
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
 
     <div class="flex flex-col align-center justify-center the-height">
-        <div class="flex lower-res-screen">
-
-            <div class="flex">
-                <StartGameButtonComponent @click="startGame(); changeColSize();"/>
-                <TimerComponent :timer="timeUntilLose" />
-            </div>
-            <div class="flex">
-                <InputX @inputted="updateBoardCols" />
-                <InputY @inputted="updateBoardRows" />
-
-                <Waterchance @waterChanceChange="updateWaterChance"/>
-            </div>
-
-            
-
+        <div>
+            <TimerComponent :timer="timeUntilLose" />
         </div>
 
-
-
-
+        
         <div class="board relative">
             <div v-if="victory" class="victory-popup">
                 <h1 class="vertical-center">Victory</h1>
@@ -57,10 +36,6 @@ defineProps({
                     <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
                 </div>
             </div>
-        </div>
-
-        <div>
-            <Stats :timesWon="timesWon" />
         </div>
     </div>
 </template>
