@@ -1,7 +1,7 @@
 # hunt
 
 Current State Of Game
-<img src="https://https://github.com/waxeye7/hunt/blob/main/docs/images/screenshot1.png" width="350">
+<img src="../images/screenshot1.png" width="350">
 
 1 survivor
 1 hunter
