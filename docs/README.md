@@ -1,5 +1,7 @@
 # hunt
 
+![Current State Of Game](https://github.com/[waxeye7]/[hunt]/blob/[main]/docs/images/screenshot1.png?raw=true)
+
 1 survivor
 1 hunter
 
