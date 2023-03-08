@@ -28,6 +28,7 @@ const GameApi = {
     const game: Game = {
       hunter,
       survivor,
+      board: [],
       code: gameCode,
     };
 

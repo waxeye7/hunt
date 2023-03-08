@@ -12,6 +12,7 @@ export const useGameStore = defineStore('game', {
   getters: {
     hunter: (state) => state.game?.hunter,
     survivor: (state) => state.game?.survivor,
+    board: (state) => state.game?.board,
     gameCode: (state) => state.game?.code,
   },
   actions: {
