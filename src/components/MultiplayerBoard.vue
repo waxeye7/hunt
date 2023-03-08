@@ -1,6 +1,7 @@
 <script setup>
 import 'animate.css';
 import TimerComponent from "./Timer.vue";
+// test
 
 
 defineProps({
