@@ -1,14 +1,18 @@
 <script setup>
-import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+import MultiplayerBoard from "../components/MultiplayerBoard.vue";
+
 import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/auth";
 import { useGameStore } from "../stores/game";
+
 </script>
 
 <template>
     <div class="container relative">
-        <AbsoluteGuys />
-        <div>WELCOME YOU ARE PLAYING AS A {{ gameStore.currentPlayerType }}</div>
+
+        <MultiplayerBoard :player_type="this.gameStore.currentPlayerType" />
+        
+        
     </div>
 </template>
 
