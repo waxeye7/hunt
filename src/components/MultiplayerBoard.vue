@@ -1,18 +1,25 @@
 <script setup>
 import 'animate.css';
-import StartGameButtonComponent from "./StartGameButton.vue";
 import TimerComponent from "./Timer.vue";
-import InputX from "./Xinput.vue";
-import InputY from "./Yinput.vue";
-import Stats from "./Stats.vue";
-import Waterchance from "./Waterchance.vue";
+
+
+defineProps({
+  player_type: {
+    type: String,
+    required: true
+  }
+});
+
 
 </script>
 
 <template>
-     <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
+    
 
+     <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
+     <div style="color:white">WELCOME YOU ARE PLAYING AS AN {{ player_type.toUpperCase() }}S</div>
     <div class="flex flex-col align-center justify-center the-height">
+        
         <div>
             <TimerComponent :timer="timeUntilLose" />
         </div>
@@ -31,6 +38,7 @@ import Waterchance from "./Waterchance.vue";
                         'hex animate__animated animate__zoomIn', 
                         squareClasses(col.pos.x, col.pos.y),
                     ]" 
+                    v-on="player_type === 'survivor' && survivorPickingPos && col.terrain.active ? { click: bindSurvivorLocation } : {}"
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
                 >
                     <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
@@ -45,6 +53,7 @@ import Waterchance from "./Waterchance.vue";
 export default  {
     data() {
         return {
+            survivorPickingPos:true,
             waterChance:50,
             colSize: window.innerWidth/25 + "px",
             boardCols: 5,
@@ -79,7 +88,10 @@ export default  {
         },
     },
     methods:{
-        preGameReset() {
+        bindSurvivorLocation() {
+            console.log('working')
+        },
+        createBoard() {
             this.boardObjs = [];
             this.waterBoardPositions = [];
             let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
@@ -125,26 +137,14 @@ export default  {
                 this.boardObjs.push(rowList);
                 this.waterBoardPositions.push(waterRowList);
             }
-            // console.log(this.boardObjs);
-
             this.createPassableTiles();
-
+        },
+        preGameReset() {
             this.timeUntilLose = 100;
             this.timer = this.timeUntilLose;
             this.victory = false;
             this.running = true;
 
-            this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
-            this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
-
-            while(this.survivor.pos.x == this.startingSquare[0] && this.survivor.pos.y == this.startingSquare[1] || 
-                !this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].terrain.active) {
-
-                this.survivor.pos.x = Math.floor(Math.random() * this.boardCols);
-                this.survivor.pos.y = Math.floor(Math.random() * this.boardRows);
-            }
-
-            this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
             this.boardObjs[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
             this.hunter.pos = {x:this.startingSquare[0], y:this.startingSquare[1]};
         },
@@ -271,39 +271,41 @@ export default  {
         },
         startGame() {
             if (this.boardRows >= this.minRows && this.boardCols >= this.minCols) {
-                this.preGameReset();
+                if(this.player_type === "hunter") {
+                    this.createBoard();
+                    this.preGameReset();
+                    this.sendBoardToStorage();
+                }
+                else if(this.player_type === "survivor") {
+                    this.fetchBoardFromStorage();
+                    this.preGameReset();
+
+                    
+
+                    this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
+                }
+
             }
         },
         handleUserClicked(x, y) {
-            let clickedSquare = this.boardObjs[y][x];
-            if(clickedSquare.terrain.active && !clickedSquare.has_hunter) {
-                let survivorSquare = this.boardObjs[this.survivor.pos.y][this.survivor.pos.x];
+            if(this.player_type == "hunter") {
+                let clickedSquare = this.boardObjs[y][x];
+                if(clickedSquare.terrain.active) {
+                    let isValidHuntLocation = this.checkIfNearbyToHunter(x, y);
 
-                let isValidHuntLocation = this.checkIfNearbyToHunter(x, y);
+                    if(this.running && isValidHuntLocation && this.timeUntilLose > 0) {
 
-                if (this.running && isValidHuntLocation && this.timeUntilLose > 0) {
+                        this.hunter.pos = {x:x, y:y};
+                        clickedSquare.has_hunter = true;
 
-                    // console.log(this.boardObjs)
+                        this.timePassesUpdateSquareObjects();
+                        survivorSquare.survivor_trail.strength = 3;
+                        this.timeUntilLose -= 1;
 
-                    this.preRoundCalculations();
-
-                    this.hunter.pos = {x:x, y:y};
-                    clickedSquare.has_hunter = true;
-
-                    this.timePassesUpdateSquareObjects();
-                    survivorSquare.survivor_trail.strength = 3;
-                    
-                    this.timeUntilLose -= 1;
-
-                    if (this.isSuccess(x, y) || this.timeUntilLose === 0) {
-                        let timesWon = this.timesWon;
-                        timesWon ++;
-                        this.$emit('updateTimesWon', timesWon)
-                        this.victory = true;
-                        this.running = false;
                     }
                 }
             }
+
 
 
         },
@@ -370,82 +372,6 @@ export default  {
             else {
                 return false;
             }
-        },
-        preRoundCalculations() {
-            let allow = false;
-
-            while(!allow) {
-                const xMoves = [0];
-                if (this.survivor.pos.x !== 0) {
-                    // let squareInQuestion = this.boardObjs[this.survivor.pos.y][this.survivor.pos.x-1];
-                    // if(squareInQuestion.terrain.active) {
-                        xMoves.push(-1);
-                        if(this.hunter.pos.x === this.survivor.pos.x + 1) {
-                            xMoves.push(-1,-1,-1);
-                        }
-                        else if(this.hunter.pos.x === this.survivor.pos.x + 2) {
-                            xMoves.push(-1,-1);
-                        }
-                    // }
-                }
-                if (this.survivor.pos.x < this.boardCols -1) {
-                    // let squareInQuestion = this.boardObjs[this.survivor.pos.y][this.survivor.pos.x+1];
-                    // if(squareInQuestion.terrain.active) {
-                        xMoves.push(1);
-                        if(this.hunter.pos.x === this.survivor.pos.x - 1) {
-                            xMoves.push(1,1,1);
-                        }
-                        else if(this.hunter.pos.x === this.survivor.pos.x - 2) {
-                            xMoves.push(1,1);
-                        }
-
-                    // }
-                }
-                const xDirection = Math.floor(Math.random() * xMoves.length);
-                let newX = this.survivor.pos.x + xMoves[xDirection];
-
-                const yMoves = [0];
-                if (this.survivor.pos.y !== 0) {
-                    // let squareInQuestion = this.boardObjs[this.survivor.pos.y-1][this.survivor.pos.x];
-                    // if(squareInQuestion.terrain.active) {
-                        yMoves.push(-1);
-                        if(this.hunter.pos.y === this.survivor.pos.y + 1) {
-                            yMoves.push(-1,-1,-1);
-                        }
-                        else if(this.hunter.pos.y === this.survivor.pos.y + 2) {
-                            yMoves.push(-1,-1);
-                        }
-                    // }
-                }
-                if (this.survivor.pos.y < this.boardRows -1) {
-                    // let squareInQuestion = this.boardObjs[this.survivor.pos.y+1][this.survivor.pos.x];
-                    // if(squareInQuestion.terrain.active) {
-                        yMoves.push(1);
-
-                        if(this.hunter.pos.y === this.survivor.pos.y - 1) {
-                            yMoves.push(1,1,1);
-                        }
-                        else if(this.hunter.pos.y === this.survivor.pos.y - 2) {
-                            yMoves.push(1,1);
-                        }
-                    // }
-                }
-                const yDirection = Math.floor(Math.random() * yMoves.length);
-                let newY = this.survivor.pos.y + yMoves[yDirection];
-
-                // console.log(xMoves, yMoves)
-
-                let squareToGo = this.boardObjs[newY][newX]
-                if(!squareToGo.has_hunter && squareToGo.terrain.active) {
-                    if(this.checkIfNearbyToSurvivor(newX, newY)) {
-                        allow = true;
-                        this.survivor.pos.x = newX;
-                        this.survivor.pos.y = newY;
-                        squareToGo.has_survivor = true;
-                    }
-                }
-            }
-
         },
         isActive(x, y) {
             return this.hunter.pos.x === x && this.hunter.pos.y === y;
