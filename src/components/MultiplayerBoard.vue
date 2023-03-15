@@ -1,13 +1,14 @@
 <script setup>
 import 'animate.css';
-import TimerComponent from "./Timer.vue";
-
-
 defineProps({
-  player_type: {
-    type: String,
+game_store: {
+    type: Object,
     required: true
-  }
+  },
+player_type: {
+    type: String,
+    required:true
+},
 });
 
 
@@ -17,20 +18,21 @@ defineProps({
     
 
      <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
-     <div style="color:white">WELCOME YOU ARE PLAYING AS AN {{ player_type.toUpperCase() }}S</div>
-    <div class="flex flex-col align-center justify-center the-height">
-        
-        <div>
-            <TimerComponent :timer="timeUntilLose" />
-        </div>
+     <div style="color:white">{{ game_store.hunter }}</div>
+     <div style="color:white">{{ game_store.survivor }}</div>
+     
+     <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ player_type.toUpperCase() }}S</div>
+    <div class="flex flex-col align-center justify-center the-height relative">
+                
+        <div v-if="survivorPickingPos && player_type==='survivor'" class="starting-location-style">pick your starting location now</div>
+        <div v-else-if="survivorPickingPos && player_type==='hunter'" class="starting-location-style">the survivor is picking their starting location now</div>
 
-        
         <div class="board relative">
             <div v-if="victory" class="victory-popup">
                 <h1 class="vertical-center">Victory</h1>
             </div>
 
-            <div  v-for="(row, rowIdx) in boardObjs" :class="{'marginLeftBasedOnSquareSize':rowIdx % 2 == 1}" :key="rowIdx" class="row">
+            <div  v-for="(row, rowIdx) in game_store.board" :class="{'marginLeftBasedOnSquareSize':rowIdx % 2 == 1}" :key="rowIdx" class="row">
                 <div 
                     v-for="(col, colIdx) in row" 
                     :key="colIdx" 
@@ -38,10 +40,9 @@ defineProps({
                         'hex animate__animated animate__zoomIn', 
                         squareClasses(col.pos.x, col.pos.y),
                     ]" 
-                    v-on="player_type === 'survivor' && survivorPickingPos && col.terrain.active ? { click: bindSurvivorLocation } : {}"
                     @click="handleUserClicked(col.pos.x, col.pos.y)"
                 >
-                    <!-- {{ `${col.pos.x}, ${col.pos.y}` }} -->
+                    {{ `${col.pos.x}, ${col.pos.y}` }}
                 </div>
             </div>
         </div>
@@ -53,264 +54,75 @@ defineProps({
 export default  {
     data() {
         return {
-            survivorPickingPos:true,
-            waterChance:50,
             colSize: window.innerWidth/25 + "px",
-            boardCols: 5,
-            boardRows: 5,
-            minCols : 3,
-            minRows: 3,
-            boardObjs: [],
+            survivorPickingPos:true,
             waterBoardPositions: [],
-            running:false,
+            running:true,
             victory:false,
-            maxTrailLength: 3,
-            hunter:{
-                pos:{
-
-                }
-            },
-            survivor:{
-                pos:{
-
-                },
-                trail: []
-            },
-            timeUntilLose:15,
         }
     },
     computed: {
-        startingSquare() {
-            return [Math.floor(this.boardCols/2),Math.floor(this.boardRows/2)]
-        },
-        boardSize() {
-            return this.boardCols * this.boardRows;
-        },
+
     },
     methods:{
-        bindSurvivorLocation() {
+        bindSurvivorLocation(x,y) {
             console.log('working')
+            this.game_store.survivor.pos = {x:x,y:y};
+            this.survivorPickingPos = false;
         },
-        createBoard() {
-            this.boardObjs = [];
-            this.waterBoardPositions = [];
-            let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
-            let rowNum = 0;
-            let squareNumber = 1;
-            for(let row of boardList) {
-                let colNum = 0;
-                let rowList = [];
-                let waterRowList = [];
-                for(let squareInRow of row) {
 
-                    rowList.push(this.createSquareObject(colNum, rowNum, squareNumber));
-
-
-                    if(colNum == this.startingSquare[0] && rowNum == this.startingSquare[1]) {
-                        waterRowList.push({
-                            pos:{
-                                x:colNum,
-                                y:rowNum
-                            },
-                            water:false,
-                            id:2
-                        });
-                    }
-                    else {
-                        waterRowList.push(
-                        {
-                            pos:{
-                                x:colNum,
-                                y:rowNum
-                            },
-
-                            water:true,
-                            id:0
-                        });
-                    }
-
-
-                    colNum += 1;
-                    squareNumber += 1;
-                }
-                rowNum += 1;
-                this.boardObjs.push(rowList);
-                this.waterBoardPositions.push(waterRowList);
-            }
-            this.createPassableTiles();
-        },
-        preGameReset() {
-            this.timeUntilLose = 100;
-            this.timer = this.timeUntilLose;
-            this.victory = false;
-            this.running = true;
-
-            this.boardObjs[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
-            this.hunter.pos = {x:this.startingSquare[0], y:this.startingSquare[1]};
-        },
-        createPassableTiles() {
-            let more_tiles = true;
-            let currentNumber = 2;
-            while(more_tiles) {
-                more_tiles = false;
-
-                let rowNum = 0;
-                for(let row of this.waterBoardPositions) {
-                    let colNum = 0;
-                    for(let col of row) {
-                        let square = row[colNum];
-                        if(row[colNum].id==currentNumber) {
-                            let neighbours = this.findAdjacentTiles(square, this.waterBoardPositions);
-                            let squaresChanged = 0;
-                            for(let n of neighbours) {
-                                let random;
-                                    random = Math.floor(Math.random() * 10) + 1;
-                                    if(random <= Math.floor(this.waterChance/10)) {
-                                        // make water if random within chance of waterchance
-                                        if(n.id == 0) {
-                                            n.id = 1;
-                                        }
-                                    }
-                                    else {
-                                        // dont make water, random didn't hit
-                                        if(n.id == 0) {
-                                            squaresChanged ++;
-                                            n.water = false;
-                                            n.id = currentNumber + 1;
-                                            more_tiles = true;
-                                        }
-                                    }
-                                }
-                            if(currentNumber == 2 && squaresChanged == 0) {
-                                let random = Math.floor(Math.random() * 6);
-                                let chosen = neighbours[random];
-                                chosen.water = false;
-                                chosen.id = 3;
-                                more_tiles = true;
-                            }
-                        }
-                        colNum++;
-                    }
-                    rowNum++;
-
-                }
-                currentNumber ++;
-            }
-
-            let rowNum = 0;
-            for(let row of this.boardObjs) {
-                let colNum = 0;
-                for(let col of row) {
-                    if(this.waterBoardPositions[rowNum][colNum].water) {
-                        col.terrain.active = false;
-                    }
-                    colNum++;
-                }
-                rowNum++;
-            }
-        },
-        findAdjacentTiles(currentLocation, listOfObjects) {
-            let neighbours = [];
-            if(currentLocation && currentLocation.pos) {
-                for(let i = -1; i <= 1; i++) {
-                    for(let o = -1; o <= 1; o++) {
-                        let x = i + currentLocation.pos.x;
-                        let y = o + currentLocation.pos.y;
-                        if(x >= 0 && y >= 0 && this.boardRows-1 >= y && this.boardCols-1 >= x && (x !== currentLocation.pos.x || y !== currentLocation.pos.y)) {
-                            if(listOfObjects[y][x]) {
-                                if(currentLocation.pos.y % 2 == 0 && (currentLocation.pos.x + 1 == x && (currentLocation.pos.y - 1 == y || currentLocation.pos.y + 1 == y)) ||
-                                   currentLocation.pos.y % 2 == 1 && (currentLocation.pos.x - 1 == x && (currentLocation.pos.y - 1 == y || currentLocation.pos.y + 1 == y))) {
-
-                                }
-                                else {
-                                    neighbours.push(listOfObjects[y][x]);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return neighbours;
-        },
-        createSquareObject(x, y, squareNumber) {
-            let square = {
-                id:squareNumber,
-                pos:{
-                    x:x,
-                    y:y
-                },
-                survivor_trail:{
-                    strength:0,
-                    show:true,
-                },
-                terrain:{
-                    active:true,
-                    passable:true,
-                },
-                has_hunter:false,
-                has_survivor:false,
-            };
-            return square;
-        },
         timePassesUpdateSquareObjects() {
-            for(let row of this.boardObjs) {
+            for(let row of this.game_store.board) {
                 for(let square of row) {
                     if(square.survivor_trail.strength > 0) {
                         square.survivor_trail.strength -= 1;
                     }
-                    if(this.hunter.pos.x !== square.pos.x || this.hunter.pos.y !== square.pos.y) {
+                    if(this.game_store.hunter.pos.x !== square.pos.x || this.game_store.hunter.pos.y !== square.pos.y) {
                         square.has_hunter = false;
                     }
-                    if(this.survivor.pos.x !== square.pos.x || this.survivor.pos.y !== square.pos.y) {
+                    if(this.game_store.survivor.pos.x !== square.pos.x || this.game_store.survivor.pos.y !== square.pos.y) {
                         square.has_survivor = false;
                     }
                     
                 }
             }
         },
-        startGame() {
-            if (this.boardRows >= this.minRows && this.boardCols >= this.minCols) {
-                if(this.player_type === "hunter") {
-                    this.createBoard();
-                    this.preGameReset();
-                    this.sendBoardToStorage();
-                }
-                else if(this.player_type === "survivor") {
-                    this.fetchBoardFromStorage();
-                    this.preGameReset();
 
-                    
-
-                    this.boardObjs[this.survivor.pos.y][this.survivor.pos.x].has_survivor = true;
-                }
-
-            }
-        },
         handleUserClicked(x, y) {
-            if(this.player_type == "hunter") {
-                let clickedSquare = this.boardObjs[y][x];
-                if(clickedSquare.terrain.active) {
-                    let isValidHuntLocation = this.checkIfNearbyToHunter(x, y);
+            let clickedSquare = this.game_store.board[y][x];
 
-                    if(this.running && isValidHuntLocation && this.timeUntilLose > 0) {
+            if(this.player_type === "survivor") {
+                if(clickedSquare.has_hunter) {
+                    return;
+                }
 
-                        this.hunter.pos = {x:x, y:y};
-                        clickedSquare.has_hunter = true;
-
-                        this.timePassesUpdateSquareObjects();
-                        survivorSquare.survivor_trail.strength = 3;
-                        this.timeUntilLose -= 1;
-
-                    }
+                if(this.survivorPickingPos && clickedSquare.terrain.active) {
+                    this.bindSurvivorLocation(x, y)
+                }
+                else if(this.running && clickedSquare.terrain.active && this.checkIfNearbyToSurvivor(x, y) && (clickedSquare.pos.x !== this.game_store.hunter.pos.x || clickedSquare.pos.y !== this.game_store.hunter.pos.y)) {
+                    this.game_store.survivor.pos = {x:x, y:y};
+                    clickedSquare.has_survivor = true;
+                    this.game_store.survivor.has_moved = true;
                 }
             }
+            else if(this.player_type == "hunter") {
+                if(this.survivorPickingPos) {
+                    return;
+                }
+                if(this.running && clickedSquare.terrain.active && this.checkIfNearbyToHunter(x, y)) {
 
+                    this.game_store.hunter.pos = {x:x, y:y};
+                    clickedSquare.has_hunter = true;
+                    this.game_store.survivor.has_moved = true;
 
+                    this.timePassesUpdateSquareObjects();
+                    this.game_store.board[this.game_store.survivor.pos.y][this.game_store.survivor.pos.x].survivor_trail.strength = 3;
 
+                }
+            }
         },
         checkIfHit(x, y) {
-            if(x == this.survivor.pos.x && y == this.survivor.pos.y) {
+            if(x == this.game_store.survivor.pos.x && y == this.game_store.survivor.pos.y) {
                 this.running = false;
                 return true;
             }
@@ -319,11 +131,11 @@ export default  {
             }
         },
         checkIfNearbyToSurvivor(x, y) {
-            if((x == this.survivor.pos.x || x-1 == this.survivor.pos.x || x+1 == this.survivor.pos.x) && 
-            (y == this.survivor.pos.y || y-1 == this.survivor.pos.y || y+1 == this.survivor.pos.y)) {
+            if((x == this.game_store.survivor.pos.x || x-1 == this.game_store.survivor.pos.x || x+1 == this.game_store.survivor.pos.x) && 
+            (y == this.game_store.survivor.pos.y || y-1 == this.game_store.survivor.pos.y || y+1 == this.game_store.survivor.pos.y)) {
 
-                if(this.survivor.pos.y % 2 == 0 && (this.survivor.pos.x + 1 == x && (this.survivor.pos.y - 1 == y || this.survivor.pos.y + 1 == y)) ||
-                this.survivor.pos.y % 2 == 1 && (this.survivor.pos.x - 1 == x && (this.survivor.pos.y - 1 == y || this.survivor.pos.y + 1 == y))) {
+                if(this.game_store.survivor.pos.y % 2 == 0 && (this.game_store.survivor.pos.x + 1 == x && (this.game_store.survivor.pos.y - 1 == y || this.game_store.survivor.pos.y + 1 == y)) ||
+                this.game_store.survivor.pos.y % 2 == 1 && (this.game_store.survivor.pos.x - 1 == x && (this.game_store.survivor.pos.y - 1 == y || this.game_store.survivor.pos.y + 1 == y))) {
 
                     return false;
 
@@ -339,13 +151,13 @@ export default  {
         checkIfNearbyToHunter(x, y) {
 
 
-            if((x == this.hunter.pos.x || x-1 == this.hunter.pos.x || x+1 == this.hunter.pos.x) && 
-                (y == this.hunter.pos.y || y-1 == this.hunter.pos.y || y+1 == this.hunter.pos.y)) {
+            if((x == this.game_store.hunter.pos.x || x-1 == this.game_store.hunter.pos.x || x+1 == this.game_store.hunter.pos.x) && 
+                (y == this.game_store.hunter.pos.y || y-1 == this.game_store.hunter.pos.y || y+1 == this.game_store.hunter.pos.y)) {
 
 
 
-                if(this.hunter.pos.y % 2 == 0 && (this.hunter.pos.x + 1 == x && (this.hunter.pos.y - 1 == y || this.hunter.pos.y + 1 == y)) ||
-                this.hunter.pos.y % 2 == 1 && (this.hunter.pos.x - 1 == x && (this.hunter.pos.y - 1 == y || this.hunter.pos.y + 1 == y))) {
+                if(this.game_store.hunter.pos.y % 2 == 0 && (this.game_store.hunter.pos.x + 1 == x && (this.game_store.hunter.pos.y - 1 == y || this.game_store.hunter.pos.y + 1 == y)) ||
+                this.game_store.hunter.pos.y % 2 == 1 && (this.game_store.hunter.pos.x - 1 == x && (this.game_store.hunter.pos.y - 1 == y || this.game_store.hunter.pos.y + 1 == y))) {
 
                     return false;
 
@@ -358,10 +170,11 @@ export default  {
                 return false;
             }
         },
+
         checkIfRangeXToHunter(x, y, range) {
 
-            let hunterX = this.hunter.pos.x;
-            let hunterY = this.hunter.pos.y;
+            let hunterX = this.game_store.hunter.pos.x;
+            let hunterY = this.game_store.hunter.pos.y;
             if(Math.abs(hunterX - x) <= range && Math.abs(hunterY - y) <= range) {
                 if(hunterY % 2 == 0 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x > hunterX ||
                    hunterY % 2 == 1 && Math.abs(hunterX - x) == range && Math.abs(hunterY - y) >= 1 && x < hunterX) {
@@ -374,16 +187,16 @@ export default  {
             }
         },
         isActive(x, y) {
-            return this.hunter.pos.x === x && this.hunter.pos.y === y;
+            return this.game_store.hunter.pos.x === x && this.game_store.hunter.pos.y === y;
         },
         isSuccess(x, y) {
-            return this.hunter.pos.x === this.survivor.pos.x && this.hunter.pos.y === this.survivor.pos.y && this.hunter.pos.x === x && this.hunter.pos.y === y;
+            return this.game_store.hunter.pos.x === this.game_store.survivor.pos.x && this.game_store.hunter.pos.y === this.game_store.survivor.pos.y && this.game_store.hunter.pos.x === x && this.game_store.hunter.pos.y === y;
         },
         survivorNear(x, y) {
-            return this.survivor.pos.x === x && this.survivor.pos.y === y && this.checkIfNearbyToHunter(x, y);
+            return this.game_store.survivor.pos.x === x && this.game_store.survivor.pos.y === y && this.checkIfNearbyToHunter(x, y);
         },
         survivorRangeX(x, y, range) {
-            let square = this.boardObjs[y][x];
+            let square = this.game_store.board[y][x];
             if(square.has_survivor && this.checkIfRangeXToHunter(x, y, range)) {
                 return true;
             }
@@ -398,60 +211,59 @@ export default  {
         },
         squareClasses(x, y) {
             const classes = [];
-
-            let square = this.boardObjs[y][x];
-
-            if(this.victory) {
+            let square = this.game_store.board[y][x];
+            if(!this.running) {
                 classes.push("lower-brightness")
             }
-
+            if(this.player_type === "hunter" && this.survivorPickingPos) {
+                classes.push("lower-brightness", "not-allowed");
+                if(square.has_hunter) {
+                    classes.push('survivor-see-hunter')
+                }
+            }
             if(!square.terrain.active) {
                 classes.push('inactive-square');
                 return classes;
             }
-            
-            classes.push(this.checkIfNearbyToHunter(x, y) && this.running ? 'allowed' : 'not-allowed');
 
-            if (this.isSuccess(x, y)) {
-                classes.push('success')
-                return classes;
+
+            if(this.player_type === "survivor") {
+                if(square.has_hunter) {
+                    classes.push('survivor-see-hunter');
+                    return classes
+                }
+                if(this.running && this.survivorPickingPos) {
+                    classes.push('allowed');
+                    return classes;
+                }
+                classes.push(this.checkIfNearbyToSurvivor(x, y) && this.running ? 'allowed' : 'not-allowed');
+                if (square.pos.x === this.game_store.survivor.pos.x && square.pos.y === this.game_store.survivor.pos.y) {
+                    classes.push('survivor-near')
+                }
+
             }
+            else if(this.player_type === "hunter" && !this.survivorPickingPos) {
 
-            if (this.isActive(x, y)) {
-                classes.push('active');
-                return classes;
-            }
+                if (this.isActive(x, y)) {
+                    classes.push('active');
+                    return classes;
+                }
+                classes.push(this.checkIfNearbyToHunter(x, y) && this.running ? 'allowed' : 'not-allowed');
+                if (this.survivorRangeX(x, y, 2)) {
+                    classes.push('survivor-near');
+                    return classes;
+                }
 
-            if (this.survivorRangeX(x, y, 2)) {
-                classes.push('survivor-near');
-                return classes;
             }
 
             classes.push(this.trailClass(x, y, square));
             return classes;
         },
-        updateBoardCols(value) {
-            this.boardCols = value
-        },
-        updateBoardRows(value) {
-            this.boardRows = value
-        },
-        updateWaterChance(value) {
-            this.waterChance = value;
-        },
-        changeColSize() {
-            if(this.boardCols >= this.boardRows) {
-                this.colSize = window.innerWidth/(this.boardCols+20) + "px";
-               
-            }
-            else {
-                this.colSize = window.innerWidth/(this.boardRows+20) + "px";
-            }
-        }
+
     },
     
     created() {
-        this.startGame()
+        // this.startGame()
     }
 }
 </script>
@@ -478,7 +290,14 @@ export default  {
     font-size:30px;
 }
 .lower-brightness {
-    filter: brightness(0.3);
+    filter: brightness(0.3) !important;
+}
+.starting-location-style {
+    color:white;
+    position:absolute;
+    top:14%;
+    z-index: 100;
+    font-size: clamp(20px, 5vw, 30px);
 }
 .board {
     padding:48px;
@@ -523,7 +342,7 @@ export default  {
 
 }
 .not-allowed {
-    cursor: not-allowed;
+    cursor: not-allowed !important;
 }
 
 .inactive-square {
@@ -544,7 +363,17 @@ export default  {
     background-position:center;
     background-repeat: no-repeat;
     cursor: default !important;
-    filter: brightness(1) !important;
+    filter: brightness(1);
+    transform: scale(1) !important;
+}
+.survivor-see-hunter {
+    background-color: rgb(145, 145, 145) !important;
+    background-image: url("../assets/hunt.webp") !important;
+    background-size:70px 70px;
+    background-position:center;
+    background-repeat: no-repeat;
+    cursor: not-allowed !important;
+    /* filter: brightness(1) !important; */
     transform: scale(1) !important;
 }
 
