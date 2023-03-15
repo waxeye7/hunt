@@ -1,11 +1,11 @@
 <script setup>
 import 'animate.css';
-import StartGameButtonComponent from "./StartGameButton.vue";
-import TimerComponent from "./Timer.vue";
-import InputX from "./Xinput.vue";
-import InputY from "./Yinput.vue";
-import Stats from "./Stats.vue";
-import Waterchance from "./Waterchance.vue";
+import StartGameButtonComponent from "./buttons/StartGameButton.vue";
+import TimerComponent from "./buttons/Timer.vue";
+import InputX from "./inputs/Xinput.vue";
+import InputY from "./inputs/Yinput.vue";
+import Stats from "./buttons/Stats.vue";
+import Waterchance from "./inputs/Waterchance.vue";
 
 defineProps({
   timesWon: { //'Heading_Msg' is the variable name we to it in this example, and you can name it however you want

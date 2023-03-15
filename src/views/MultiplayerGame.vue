@@ -5,12 +5,13 @@ import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/auth";
 import { useGameStore } from "../stores/game";
 
+
 </script>
 
 <template>
     <div class="container relative">
 
-        <MultiplayerBoard :player_type="this.gameStore.currentPlayerType" />
+        <MultiplayerBoard :game_store="this.gameStore.game" :player_type="this.gameStore.currentPlayerType" />
         
         
     </div>
@@ -28,6 +29,10 @@ import { useGameStore } from "../stores/game";
             ...mapStores(useAuthStore, useGameStore)
         },
         methods: {
+            
         },
+        created() {
+
+        }
     }
 </script>

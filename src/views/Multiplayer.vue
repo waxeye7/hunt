@@ -1,5 +1,5 @@
 <script setup>
-import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 </script>
 
 <template>
@@ -28,7 +28,7 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     top:64%;
     text-align: center;
     font-size: clamp(14px, 2vw, 16px);
-    width:100vw;
+    width:fit-content;
 }
 .txt-block {
     font-size: clamp(16px, 2vw,20px);
@@ -37,11 +37,11 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     left:50%;
     transform: translate(-50%, 0);
     text-align: center;
-    width:100vw;
+    width:fit-content;
 }
 .container {
     height:calc(100vh - 46px);
-    background-color:white !important;
+    background-color:rgba(86, 255, 71, 0.815) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
