@@ -1,12 +1,12 @@
 <script setup>
-import AbsoluteGuys from "../components/AbsoluteGuys.vue";
+import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 
 </script>
 
 <template>
     <div class="container relative">
-        <h1>pageviews: {{ pageviews_count }}</h1>
-        <h1>visits: {{ visits_count }}</h1>
+        <h4>pageviews: {{ pageviews_count }}</h4>
+        <h4>visits: {{ visits_count }}</h4>
         <AbsoluteGuys />
         <div class="txt-block">
             <h1>Welcome To</h1>
@@ -24,6 +24,45 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     </div>
 </template>
 
+
+<script>
+    export default {
+        data() {
+            return {
+                pageviews_count:null,
+                visits_count:null
+            }
+        },
+        computed: {
+
+        },
+        methods: {
+            updateCounter(type) {
+                fetch('http://127.0.0.1:3002/api?'+type)
+                .then(res => res.json())
+                .then(data => {
+                    this.pageviews_count = data.pageviews;
+                    this.visits_count = data.visits;
+                })
+            }
+        },
+        created() {
+
+            if(sessionStorage.getItem('visit') === null) {
+                this.updateCounter('type=visit-pageview');
+            }
+            else {
+                this.updateCounter('type=pageview');
+            }
+           
+            sessionStorage.setItem('visit', 'x');
+            
+        }
+    }
+</script>
+
+
+
 <style scoped>
 .players-online {
     position:absolute;
@@ -32,7 +71,7 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     top:64%;
     text-align: center;
     font-size: clamp(14px, 2vw, 16px);
-    width:100vw;
+    width:fit-content;
 }
 .txt-block {
     font-size: clamp(16px, 2vw,20px);
@@ -41,11 +80,11 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     left:50%;
     transform: translate(-50%, 0);
     text-align: center;
-    width:100vw;
+    width:fit-content;
 }
 .container {
     height:calc(100vh - 46px);
-    background-color:white !important;
+    background-color:rgba(86, 255, 71, 0.815) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -71,38 +110,3 @@ import AbsoluteGuys from "../components/AbsoluteGuys.vue";
     padding-bottom: 100px;
 }
 </style>
-
-<script>
-    export default {
-        data() {
-            return {
-                pageviews_count:0,
-                visits_count:0
-            }
-        },
-        computed: {
-
-        },
-        methods: {
-            updateCounter(type) {
-                fetch('http://127.0.0.1:3002/api?'+type)
-                .then(res => res.json())
-                .then(data => {
-                    this.pageviews_count = data.pageviews;
-                    this.visits_count = data.visits;
-                })
-            }
-        },
-        created() {
-
-            if(sessionStorage.getItem('visit') === null) {
-                this.updateCounter('type=visit-pageview');
-            }
-            else {
-                this.updateCounter('type=pageview');
-            }
-            sessionStorage.setItem('visit', 'x');
-            
-        }
-    }
-</script>
