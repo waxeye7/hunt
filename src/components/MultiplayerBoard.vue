@@ -2,14 +2,6 @@
 import 'animate.css';
 import { useGameStore } from "../stores/game";
 import { mapStores } from 'pinia'
-defineProps({
-    player_type: {
-        type: String,
-        required: true
-    },
-});
-
-
 </script>
 
 <template>
@@ -17,12 +9,12 @@ defineProps({
     <div style="color:white">{{ gameStore.hunter }}</div>
     <div style="color:white">{{ gameStore.survivor }}</div>
 
-    <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ player_type.toUpperCase() }}S</div>
+    <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ gameStore.currentPlayerType.toUpperCase() }}S</div>
     <div class="flex flex-col align-center justify-center the-height relative">
 
-        <div v-if="survivorPickingPos && player_type === 'survivor'" class="starting-location-style">pick your starting
+        <div v-if="survivorPickingPos && gameStore.currentPlayerType === 'survivor'" class="starting-location-style">pick your starting
             location now</div>
-        <div v-else-if="survivorPickingPos && player_type === 'hunter'" class="starting-location-style">the survivor is
+        <div v-else-if="survivorPickingPos && gameStore.currentPlayerType === 'hunter'" class="starting-location-style">the survivor is
             picking their starting location now</div>
 
         <div class="board relative">
@@ -59,12 +51,13 @@ export default {
         ...mapStores(useGameStore),
     },
     methods: {
-        bindSurvivorLocation(x, y) {
+        async bindSurvivorLocation(x, y) {
             console.log('working')
             this.gameStore.survivor.pos = { x, y };
-            this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.pos": { x, y } })
+            await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.pos": { x, y }, "survivor.has_moved": true })
             this.survivorPickingPos = false;
-            this.gameStore.getGameByCode(this.gameStore.gameCode);
+            await this.gameStore.getGameByCode(this.gameStore.gameCode);
+            this.playGame();
         },
 
         timePassesUpdateSquareObjects() {
@@ -84,10 +77,10 @@ export default {
             }
         },
 
-        handleUserClicked(x, y) {
+        async handleUserClicked(x, y) {
             let clickedSquare = this.gameStore.board[y][x];
 
-            if (this.player_type === "survivor") {
+            if (this.gameStore.currentPlayerType === "survivor") {
                 if (clickedSquare.has_hunter) {
                     return;
                 }
@@ -99,9 +92,12 @@ export default {
                     this.gameStore.survivor.pos = { x: x, y: y };
                     clickedSquare.has_survivor = true;
                     this.gameStore.survivor.has_moved = true;
+                    await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.pos": { x, y }, "survivor.has_moved": true })
+                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
+
                 }
             }
-            else if (this.player_type == "hunter") {
+            else if (this.gameStore.currentPlayerType == "hunter") {
                 if (this.survivorPickingPos) {
                     return;
                 }
@@ -110,6 +106,9 @@ export default {
                     this.gameStore.hunter.pos = { x: x, y: y };
                     clickedSquare.has_hunter = true;
                     this.gameStore.survivor.has_moved = true;
+
+                    await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "hunter.pos": { x, y }, "hunter.has_moved": true })
+                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
 
                     this.timePassesUpdateSquareObjects();
                     this.gameStore.board[this.gameStore.survivor.pos.y][this.gameStore.survivor.pos.x].survivor_trail.strength = 3;
@@ -211,7 +210,7 @@ export default {
             if (!this.running) {
                 classes.push("lower-brightness")
             }
-            if (this.player_type === "hunter" && this.survivorPickingPos) {
+            if (this.gameStore.currentPlayerType === "hunter" && this.survivorPickingPos) {
                 classes.push("lower-brightness", "not-allowed");
                 if (square.has_hunter) {
                     classes.push('survivor-see-hunter')
@@ -223,7 +222,7 @@ export default {
             }
 
 
-            if (this.player_type === "survivor") {
+            if (this.gameStore.currentPlayerType === "survivor") {
                 if (square.has_hunter) {
                     classes.push('survivor-see-hunter');
                     return classes
@@ -238,7 +237,7 @@ export default {
                 }
 
             }
-            else if (this.player_type === "hunter" && !this.survivorPickingPos) {
+            else if (this.gameStore.currentPlayerType === "hunter" && !this.survivorPickingPos) {
 
                 if (this.isActive(x, y)) {
                     classes.push('active');
@@ -255,6 +254,27 @@ export default {
             classes.push(this.trailClass(x, y, square));
             return classes;
         },
+
+        async playGame() {
+            const games = await this.gameStore.getGames();
+            for await (const change of games.watch({
+                filter: {
+                    operationType: "update",
+                    "fullDocument.code": this.gameStore.gameCode,
+                },
+            })) {
+                // The change event will always represent a newly inserted perennial
+                const { documentKey, fullDocument } = change;
+                const { hunter, survivor } = fullDocument;
+                const surivorHasMoved = (this.gameStore.currentPlayerType === "hunter" && (this.gameStore.survivor.pos.x !== survivor.pos.x) || (this.gameStore.survivor.pos.y !== survivor.pos.y));
+                const hunterHasMoved = (this.gameStore.currentPlayerType === "survivor" && (this.gameStore.hunter.pos.x !== hunter.pos.x) || (this.gameStore.hunter.pos.y !== hunter.pos.y));
+                if (surivorHasMoved || hunterHasMoved) {
+                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
+                    break;
+                }
+            }
+        },
+
         async waitForSurvivorPosition() {
             const games = await this.gameStore.getGames();
             for await (const change of games.watch({
@@ -267,19 +287,21 @@ export default {
                 const { documentKey, fullDocument } = change;
                 const { hunter, survivor } = fullDocument;
                 if (survivor.has_moved) {
+                    console.log('survivor has moved')
                     this.survivorPickingPos = false;
                     await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.has_moved": false });
                     this.gameStore.getGameByCode(this.gameStore.gameCode);
                     break;
                 }
             }
+            this.playGame();
         },
 
     },
 
     async created() {
-        if (this.player_type === "hunter") {
-            await waitForSurvivorPosition();
+        if (this.gameStore.currentPlayerType === "hunter") {
+            await this.waitForSurvivorPosition();
         }
 
     }

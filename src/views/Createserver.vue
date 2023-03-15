@@ -84,11 +84,7 @@ export default {
         const { hunter, survivor } = fullDocument;
         if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
           this.bothConnected = true;
-          this.gameStore.game.hunter.has_connected = true;
-          this.gameStore.game.survivor.has_connected = true;
           await this.gameStore.getGameByCode(this.gameCode);
-
-          console.log(this.gameStore.game)
 
           router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
         }
