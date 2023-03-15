@@ -1,5 +1,5 @@
 <script setup>
- import BoardComponent from "./Board.vue";
+ import BoardComponent from "../Board.vue";
 </script>
 
 <template>

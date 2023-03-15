@@ -1,8 +1,12 @@
+<script setup>
+import 'animate.css';
+</script>
+
 <template>
-    <img class="survivor absolute" src="../assets/survivor.gif">
-    <img class="hunter absolute" src="../assets/hunt.webp">
-    <img class="survivor2 absolute" src="../assets/survivor.gif">
-    <img class="hunter2 absolute" src="../assets/hunt.webp">
+    <img @click="clicked1=!clicked1" :class="{'animate__rotateOut':clicked1}" class="survivor absolute animate__animated" src="../../assets/survivor.gif">
+    <img @click="clicked2=!clicked2" :class="{'animate__rotateOut':clicked2}" class="hunter absolute animate__animated" src="../../assets/hunt.webp">
+    <img @click="clicked3=!clicked3" :class="{'animate__rotateOut':clicked3}" class="survivor2 absolute animate__animated" src="../../assets/survivor.gif">
+    <img @click="clicked4=!clicked4" :class="{'animate__rotateOut':clicked4}" class="hunter2 absolute animate__animated" src="../../assets/hunt.webp">
 </template>
 
 <style scoped>
@@ -36,6 +40,11 @@
 export default {
     data() {
             return {
+                clicked1:false,
+                clicked2:false,
+                clicked3:false,
+                clicked4:false,
+
                 hunterPositionLeft:Math.floor(Math.random() * Math.floor(window.innerWidth / 2.5 - 150)).toString() + "px",
                 hunterPositionTop:Math.floor(Math.random() * Math.floor(window.innerHeight - 200)).toString() + "px",
 
