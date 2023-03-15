@@ -1,6 +1,6 @@
 import * as Realm from "realm-web";
 import { useAuthStore } from "../stores/Auth";
-import { Game, PlayerType, Player } from '../types/Game';
+import { Game, PlayerType, Player, Board, Cell } from '../types/Game';
 
 const {
   BSON: { ObjectId },
@@ -19,8 +19,9 @@ const defaultPlayer: Player = {
 }
 
 const GameApi = {
-  createGame: async (playerType: PlayerType, gameCode: string) => {
+  createGame: async (playerType: PlayerType, gameCode: string, gameBoard:Board, hunterStartingPos:Cell) => {
     const hunter = { ...defaultPlayer };
+    hunter.pos = {x:hunterStartingPos.x,y:hunterStartingPos.y};
     hunter.has_connected = playerType === "hunter";
     const survivor = { ...defaultPlayer };
     survivor.has_connected = playerType === "survivor";
@@ -28,7 +29,7 @@ const GameApi = {
     const game: Game = {
       hunter,
       survivor,
-      board: [],
+      board: gameBoard,
       code: gameCode,
     };
 
