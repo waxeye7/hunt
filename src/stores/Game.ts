@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import GameApi from '../api/Game';
-import { Game, PlayerType } from '../types/Game';
+import { Game, PlayerType, Board, Cell } from '../types/Game';
 
 interface IGameStore {
   game: Game | null;
@@ -16,11 +16,11 @@ export const useGameStore = defineStore('game', {
     gameCode: (state) => state.game?.code,
   },
   actions: {
-    async createGame(playerType: PlayerType, gameCode: string) {
+    async createGame(playerType: PlayerType, gameCode: string, gameBoard:Board, hunterStartingPos:Cell) {
       if (this.game) {
         return;
       }
-      return await GameApi.createGame(playerType, gameCode);
+      return await GameApi.createGame(playerType, gameCode, gameBoard, hunterStartingPos);
     },
 
     async getGames() {
