@@ -2,6 +2,7 @@
 import 'animate.css';
 import { useGameStore } from "../stores/game";
 import { mapStores } from 'pinia'
+import WinApi from "../api/Win";
 </script>
 
 <template>
@@ -309,9 +310,11 @@ export default {
             }
         },
 
-        checkIfGameOver() {
+        async checkIfGameOver() {
             if (this.gameStore.hunter.pos.x === this.gameStore.survivor.pos.x && this.gameStore.hunter.pos.y === this.gameStore.survivor.pos.y) {
                 this.running = false;
+                if (this.gameStore.currentPlayerType === "hunter")
+                    await WinApi.incrementWins();
             }
         },
 
