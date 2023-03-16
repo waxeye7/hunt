@@ -9,13 +9,17 @@ import { mapStores } from 'pinia'
     <div style="color:white">{{ gameStore.hunter }}</div>
     <div style="color:white">{{ gameStore.survivor }}</div>
 
-    <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ gameStore.currentPlayerType.toUpperCase() }}S</div>
+    <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ gameStore.currentPlayerType.toUpperCase()
+    }}S</div>
     <div class="flex flex-col align-center justify-center the-height relative">
 
-        <div v-if="survivorPickingPos && gameStore.currentPlayerType === 'survivor'" class="starting-location-style">pick your starting
+        <div v-if="survivorPickingPos && gameStore.currentPlayerType === 'survivor'" class="starting-location-style">pick
+            your starting
             location now</div>
-        <div v-else-if="survivorPickingPos && gameStore.currentPlayerType === 'hunter'" class="starting-location-style">the survivor is
+        <div v-else-if="survivorPickingPos && gameStore.currentPlayerType === 'hunter'" class="starting-location-style">the
+            survivor is
             picking their starting location now</div>
+        <div v-else-if="!running" class="starting-location-style">Game over</div>
 
         <div class="board relative">
             <div v-if="victory" class="victory-popup">
@@ -43,7 +47,7 @@ export default {
             colSize: window.innerWidth / 25 + "px",
             survivorPickingPos: true,
             waterBoardPositions: [],
-            running: true,
+            running: true, //add running to gamestore
             victory: false,
         }
     },
@@ -53,65 +57,91 @@ export default {
     methods: {
         async bindSurvivorLocation(x, y) {
             console.log('working')
-            this.gameStore.survivor.pos = { x, y };
+            // this.gameStore.survivor.pos = { x, y };
             await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.pos": { x, y }, "survivor.has_moved": true })
             this.survivorPickingPos = false;
             await this.gameStore.getGameByCode(this.gameStore.gameCode);
-            this.playGame();
-        },
+            this.gameStore.survivor.has_moved = false;
 
-        timePassesUpdateSquareObjects() {
-            for (let row of this.gameStore.board) {
+
+            let board = this.gameStore.board;
+            for (let row of board) {
                 for (let square of row) {
-                    if (square.survivor_trail.strength > 0) {
-                        square.survivor_trail.strength -= 1;
-                    }
-                    if (this.gameStore.hunter.pos.x !== square.pos.x || this.gameStore.hunter.pos.y !== square.pos.y) {
-                        square.has_hunter = false;
-                    }
+
                     if (this.gameStore.survivor.pos.x !== square.pos.x || this.gameStore.survivor.pos.y !== square.pos.y) {
                         square.has_survivor = false;
+                    }
+                    else if (this.gameStore.survivor.pos.x === square.pos.x && this.gameStore.survivor.pos.y === square.pos.y) {
+                        square.has_survivor = true;
                     }
 
                 }
             }
+            board[this.gameStore.survivor.pos.y][this.gameStore.survivor.pos.x].survivor_trail.strength = 3;
+
+            await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "board": board });
+
+
+            this.playGame();
+        },
+
+        async timePassesUpdateSquareObjects() {
+            if (this.gameStore.currentPlayerType === "hunter") { //let hunter reset for both so only one call and nothing gets done twice.
+
+                let board = this.gameStore.board;
+                for (let row of board) {
+                    for (let square of row) {
+                        if (square.survivor_trail.strength > 0) {
+                            square.survivor_trail.strength -= 1;
+                        }
+                        if (this.gameStore.hunter.pos.x !== square.pos.x || this.gameStore.hunter.pos.y !== square.pos.y) {
+                            square.has_hunter = false;
+                        }
+                        else if (this.gameStore.hunter.pos.x === square.pos.x && this.gameStore.hunter.pos.y === square.pos.y) {
+                            square.has_hunter = true;
+                        }
+
+                        if (this.gameStore.survivor.pos.x !== square.pos.x || this.gameStore.survivor.pos.y !== square.pos.y) {
+                            square.has_survivor = false;
+                        }
+                        else if (this.gameStore.survivor.pos.x === square.pos.x && this.gameStore.survivor.pos.y === square.pos.y) {
+                            square.has_survivor = true;
+                        }
+
+                    }
+                }
+                board[this.gameStore.survivor.pos.y][this.gameStore.survivor.pos.x].survivor_trail.strength = 4;
+
+                await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "board": board });
+
+            }
+
         },
 
         async handleUserClicked(x, y) {
             let clickedSquare = this.gameStore.board[y][x];
 
             if (this.gameStore.currentPlayerType === "survivor") {
-                if (clickedSquare.has_hunter) {
+                if (clickedSquare.has_hunter || this.gameStore.survivor.has_moved) {
                     return;
                 }
 
                 if (this.survivorPickingPos && clickedSquare.terrain.active) {
-                    this.bindSurvivorLocation(x, y)
+                    await this.bindSurvivorLocation(x, y)
                 }
-                else if (this.running && clickedSquare.terrain.active && this.checkIfNearbyToSurvivor(x, y) && (clickedSquare.pos.x !== this.gameStore.hunter.pos.x || clickedSquare.pos.y !== this.gameStore.hunter.pos.y)) {
-                    this.gameStore.survivor.pos = { x: x, y: y };
-                    clickedSquare.has_survivor = true;
-                    this.gameStore.survivor.has_moved = true;
+                else if (this.running && clickedSquare.terrain.active && this.checkIfNearbyToSurvivor(x, y) && !clickedSquare.has_hunter) {
+
                     await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.pos": { x, y }, "survivor.has_moved": true })
-                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
 
                 }
             }
             else if (this.gameStore.currentPlayerType == "hunter") {
-                if (this.survivorPickingPos) {
+                if (this.survivorPickingPos || this.gameStore.hunter.has_moved) {
                     return;
                 }
                 if (this.running && clickedSquare.terrain.active && this.checkIfNearbyToHunter(x, y)) {
 
-                    this.gameStore.hunter.pos = { x: x, y: y };
-                    clickedSquare.has_hunter = true;
-                    this.gameStore.survivor.has_moved = true;
-
                     await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "hunter.pos": { x, y }, "hunter.has_moved": true })
-                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
-
-                    this.timePassesUpdateSquareObjects();
-                    this.gameStore.board[this.gameStore.survivor.pos.y][this.gameStore.survivor.pos.x].survivor_trail.strength = 3;
 
                 }
             }
@@ -233,7 +263,7 @@ export default {
                 }
                 classes.push(this.checkIfNearbyToSurvivor(x, y) && this.running ? 'allowed' : 'not-allowed');
                 if (square.pos.x === this.gameStore.survivor.pos.x && square.pos.y === this.gameStore.survivor.pos.y) {
-                    classes.push('survivor-near')
+                    classes.push('i-am-survivor')
                 }
 
             }
@@ -265,14 +295,37 @@ export default {
             })) {
                 // The change event will always represent a newly inserted perennial
                 const { documentKey, fullDocument } = change;
-                const { hunter, survivor } = fullDocument;
-                const surivorHasMoved = (this.gameStore.currentPlayerType === "hunter" && (this.gameStore.survivor.pos.x !== survivor.pos.x) || (this.gameStore.survivor.pos.y !== survivor.pos.y));
-                const hunterHasMoved = (this.gameStore.currentPlayerType === "survivor" && (this.gameStore.hunter.pos.x !== hunter.pos.x) || (this.gameStore.hunter.pos.y !== hunter.pos.y));
-                if (surivorHasMoved || hunterHasMoved) {
+                // const { hunter, survivor } = fullDocument;
+                const survivorHasMoved = fullDocument.survivor.has_moved;
+                const hunterHasMoved = fullDocument.hunter.has_moved;
+                if (survivorHasMoved && hunterHasMoved) {
+                    await this.resetForNewTurn()
+                    console.log('both moved, resetting for next round')
+                }
+                if (!survivorHasMoved && !hunterHasMoved) {
                     await this.gameStore.getGameByCode(this.gameStore.gameCode);
-                    break;
+
                 }
             }
+        },
+
+        checkIfGameOver() {
+            if (this.gameStore.hunter.pos.x === this.gameStore.survivor.pos.x && this.gameStore.hunter.pos.y === this.gameStore.survivor.pos.y) {
+                this.running = false;
+            }
+        },
+
+        async resetForNewTurn() {
+            await this.gameStore.getGameByCode(this.gameStore.gameCode);
+            await this.timePassesUpdateHunterAndSurvivor();
+            await this.timePassesUpdateSquareObjects();
+            this.checkIfGameOver();
+        },
+        async timePassesUpdateHunterAndSurvivor() {
+            if (this.gameStore.currentPlayerType === "hunter") { //let hunter update both so only make one call
+                await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "hunter.has_moved": false, "survivor.has_moved": false });
+            }
+
         },
 
         async waitForSurvivorPosition() {
@@ -285,12 +338,11 @@ export default {
             })) {
                 // The change event will always represent a newly inserted perennial
                 const { documentKey, fullDocument } = change;
-                const { hunter, survivor } = fullDocument;
-                if (survivor.has_moved) {
+                if (fullDocument.survivor.has_moved && this.survivorPickingPos) {
                     console.log('survivor has moved')
                     this.survivorPickingPos = false;
                     await this.gameStore.updateGameByCode(this.gameStore.gameCode, { "survivor.has_moved": false });
-                    this.gameStore.getGameByCode(this.gameStore.gameCode);
+                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
                     break;
                 }
             }
@@ -398,21 +450,6 @@ export default {
 
 }
 
-.not-allowed {
-    cursor: not-allowed !important;
-}
-
-.inactive-square {
-    cursor: default;
-    /* background-color: rgb(255, 0, 0); */
-    /* clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); */
-    background-image: url("../assets/water.jpg") !important;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    /* visibility: hidden; */
-}
-
 .active {
     background-color: rgb(145, 145, 145) !important;
     background-image: url("../assets/hunt.webp") !important;
@@ -423,6 +460,23 @@ export default {
     filter: brightness(1);
     transform: scale(1) !important;
 }
+
+.not-allowed {
+    cursor: not-allowed !important;
+}
+
+.inactive-square {
+    cursor: not-allowed !important;
+    /* background-color: rgb(255, 0, 0); */
+    /* clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); */
+    background-image: url("../assets/water.jpg") !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* visibility: hidden; */
+}
+
+
 
 .survivor-see-hunter {
     background-color: rgb(145, 145, 145) !important;
@@ -455,6 +509,14 @@ export default {
     background-repeat: no-repeat;
 }
 
+
+
+.i-am-survivor:hover {
+    transform: scale(1) !important;
+    background-color: rgb(145, 145, 145) !important;
+    /* filter: none !important; */
+}
+
 .trail-1 {
     background-image: url("../assets/cheese.png") !important;
     background-size: 30px 30px;
@@ -476,6 +538,13 @@ export default {
     background-repeat: no-repeat;
 }
 
+.i-am-survivor {
+    background-image: url("../assets/survivor.gif") !important;
+    background-size: 70px 70px;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: default !important;
+}
 
 
 @media only screen and (max-width: 600px) {

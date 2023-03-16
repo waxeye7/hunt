@@ -10,18 +10,18 @@ const dataSrc = "mongodb-atlas";
 const dbName = "Hunt";
 
 const defaultPlayer: Player = {
-    pos: {
-        x: 0,
-        y: 0
-    },
-    has_connected: false,
-    has_moved: false,
+  pos: {
+    x: null,
+    y: null
+  },
+  has_connected: false,
+  has_moved: false,
 }
 
 const GameApi = {
-  createGame: async (playerType: PlayerType, gameCode: string, gameBoard:Board, hunterStartingPos:Cell) => {
+  createGame: async (playerType: PlayerType, gameCode: string, gameBoard: Board, hunterStartingPos: Cell) => {
     const hunter = { ...defaultPlayer };
-    hunter.pos = {x:hunterStartingPos.x,y:hunterStartingPos.y};
+    hunter.pos = { x: hunterStartingPos.x, y: hunterStartingPos.y };
     hunter.has_connected = playerType === "hunter";
     const survivor = { ...defaultPlayer };
     survivor.has_connected = playerType === "survivor";
@@ -38,13 +38,13 @@ const GameApi = {
 
     return await games?.insertOne(game);
   },
-  
+
   getGames: async () => {
     const authStore = useAuthStore();
     const user = authStore.currentUser;
 
     if (!user) {
-        return;
+      return;
     }
 
     const mongo = user.mongoClient(dataSrc);
@@ -54,8 +54,8 @@ const GameApi = {
   updateGameByCode: async (code: string, updateParams = {}) => {
     const games = await GameApi.getGames();
     return await games?.updateOne(
-        {code},
-        { $set: updateParams }
+      { code },
+      { $set: updateParams }
     );
   },
 

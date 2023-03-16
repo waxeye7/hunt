@@ -1,7 +1,7 @@
 export interface Player {
   pos: {
-      x: number,
-      y: number,
+    x: number | null,
+    y: number | null,
   },
   has_connected: boolean,
   has_moved: boolean,
