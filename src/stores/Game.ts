@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import GameApi from "../api/Game";
-import type { Game, PlayerType, Board, Cell } from "../types/Game";
+import type { Game, PlayerType, Board, pos } from "../types/Game";
 
 interface IGameStore {
   game: Game | null;
@@ -20,7 +20,7 @@ export const useGameStore = defineStore("game", {
       playerType: PlayerType,
       gameCode: string,
       gameBoard: Board,
-      hunterStartingPos: Cell
+      hunterStartingPos: pos
     ) {
       if (this.game) {
         return;

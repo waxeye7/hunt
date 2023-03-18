@@ -67,6 +67,7 @@ defineProps({
 export default {
     data() {
         return {
+            timer: 0,
             waterChance: 50,
             colSize: window.innerWidth / 25 + "px",
             boardCols: 5,
@@ -80,12 +81,14 @@ export default {
             maxTrailLength: 3,
             hunter: {
                 pos: {
-
+                    x: null,
+                    y: null
                 }
             },
             survivor: {
                 pos: {
-
+                    x: null,
+                    y: null
                 },
                 trail: []
             },

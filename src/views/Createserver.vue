@@ -37,26 +37,29 @@ import router from "../router";
 export default {
   data() {
     return {
-      playerType: '', // "survivor" or "hunter",
+      waterBoardPositions: null,
+      playerType: null, // "survivor" or "hunter",
       gameCode: '',
       gameBoard: [],
       boardCols: 5,
       boardRows: 5,
-      waterChance:40,
-      hunterStartingPos:null,
+      waterChance: 40,
+      hunterStartingPos: null,
       created: false,
       bothConnected: false,
+      victory: null,
+      running: null
     }
   },
   computed: {
     ...mapStores(useAuthStore, useGameStore),
 
-      startingSquare() {
-          return [Math.floor(this.boardCols/2),Math.floor(this.boardRows/2)]
-      },
-      boardSize() {
-          return this.boardCols * this.boardRows;
-      },
+    startingSquare() {
+      return [Math.floor(this.boardCols / 2), Math.floor(this.boardRows / 2)]
+    },
+    boardSize() {
+      return this.boardCols * this.boardRows;
+    },
   },
   methods: {
     async create() {
@@ -136,7 +139,7 @@ export default {
       this.running = true;
 
       this.gameBoard[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
-      this.hunterStartingPos = {x:this.startingSquare[0],y:this.startingSquare[1]};
+      this.hunterStartingPos = { x: this.startingSquare[0], y: this.startingSquare[1] };
     },
     createPassableTiles() {
       let more_tiles = true;
