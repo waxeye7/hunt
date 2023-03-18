@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import GameApi from "../api/Game";
-import { Game, PlayerType, Board, Cell } from "../types/Game";
+import type { Game, PlayerType, Board, Cell } from "../types/Game";
 
 interface IGameStore {
   game: Game | null;

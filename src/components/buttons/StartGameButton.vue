@@ -23,8 +23,3 @@
     }
 }
 </style>
-
-
-<script>
-
-</script>

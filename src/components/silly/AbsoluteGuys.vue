@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import 'animate.css';
 </script>
 
@@ -36,7 +36,7 @@ import 'animate.css';
 }
 </style>
 
-<script>
+<script lang="ts">
 export default {
     data() {
             return {

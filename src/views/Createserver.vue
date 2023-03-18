@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import randomWords from "random-words";
 import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import { mapStores } from 'pinia'
-import { useAuthStore } from "../stores/auth";
-import { useGameStore } from "../stores/game";
+import { useAuthStore } from "../stores/Auth";
+import { useGameStore } from "../stores/Game";
 import router from "../router";
 </script>
 
@@ -33,7 +33,7 @@ import router from "../router";
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   data() {
     return {

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import WinApi from "../api/Win";
 </script>
@@ -26,7 +26,7 @@ import WinApi from "../api/Win";
 </template>
 
 
-<script>
+<script lang="ts">
 export default {
     data() {
         return {

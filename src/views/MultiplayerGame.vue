@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import MultiplayerBoard from "../components/MultiplayerBoard.vue";
 </script>
 

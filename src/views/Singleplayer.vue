@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import TitleComponent from "../components/Title.vue";
 import BoardComponent from "../components/Board.vue";
 </script>
@@ -14,7 +14,7 @@ import BoardComponent from "../components/Board.vue";
 
 </style>
 
-<script>
+<script lang="ts">
     export default {
         data() {
             return {

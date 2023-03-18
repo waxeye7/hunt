@@ -33,7 +33,3 @@ h2 {
     }
 }
 </style>
-
-<script>
-
-</script>

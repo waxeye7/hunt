@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import randomWords from "random-words";
 </script>
 <template>
@@ -49,7 +49,7 @@ span {
 }
 </style>
 
-<script>
+<script lang="ts">
     export default {
         data() {
             return {

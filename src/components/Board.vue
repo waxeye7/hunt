@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import 'animate.css';
 import StartGameButtonComponent from "./buttons/StartGameButton.vue";
 import TimerComponent from "./buttons/Timer.vue";
@@ -63,7 +63,7 @@ defineProps({
 </template>
 
 
-<script>
+<script lang="ts">
 export default {
     data() {
         return {

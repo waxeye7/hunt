@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 </script>
 
@@ -69,9 +69,3 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 
 }
 </style>
-
-<script>
-    export default {
-        
-    }
-</script>

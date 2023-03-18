@@ -1,6 +1,6 @@
 import * as Realm from "realm-web";
 import { useAuthStore } from "../stores/Auth";
-import { Game, PlayerType, Player, Board, Cell } from '../types/Game';
+import type { Game, PlayerType, Player, Board, Cell } from "../types/Game";
 
 const {
   BSON: { ObjectId },
@@ -12,14 +12,19 @@ const dbName = "Hunt";
 const defaultPlayer: Player = {
   pos: {
     x: null,
-    y: null
+    y: null,
   },
   has_connected: false,
   has_moved: false,
-}
+};
 
 const GameApi = {
-  createGame: async (playerType: PlayerType, gameCode: string, gameBoard: Board, hunterStartingPos: Cell) => {
+  createGame: async (
+    playerType: PlayerType,
+    gameCode: string,
+    gameBoard: Board,
+    hunterStartingPos: Cell
+  ) => {
     const hunter = { ...defaultPlayer };
     hunter.pos = { x: hunterStartingPos.x, y: hunterStartingPos.y };
     hunter.has_connected = playerType === "hunter";
@@ -48,15 +53,12 @@ const GameApi = {
     }
 
     const mongo = user.mongoClient(dataSrc);
-    return mongo.db(dbName).collection('Games');
+    return mongo.db(dbName).collection("Games");
   },
 
   updateGameByCode: async (code: string, updateParams = {}) => {
     const games = await GameApi.getGames();
-    return await games?.updateOne(
-      { code },
-      { $set: updateParams }
-    );
+    return await games?.updateOne({ code }, { $set: updateParams });
   },
 
   getGameByCode: async (code: string) => {
@@ -68,9 +70,9 @@ const GameApi = {
     }
 
     const mongo = user.mongoClient(dataSrc);
-    const collection = mongo.db(dbName).collection('Games');
+    const collection = mongo.db(dbName).collection("Games");
     return await collection.findOne({ code });
-  }
-}
+  },
+};
 
 export default GameApi;

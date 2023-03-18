@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
  import BoardComponent from "../Board.vue";
 </script>
 
@@ -40,7 +40,7 @@
 </style>
 
 
-<script>
+<script lang="ts">
     export default {
         methods: {
 

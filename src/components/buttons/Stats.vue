@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 defineProps({
   timesWon: { //'Heading_Msg' is the variable name we to it in this example, and you can name it however you want
     type: Number, // String, Number, Array, Object, Boolean
@@ -72,7 +72,7 @@ defineProps({
 
 </style>
 
-<script>
+<script lang="ts">
     export default {
         data() {
             return {
