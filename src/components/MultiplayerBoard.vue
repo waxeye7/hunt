@@ -150,6 +150,7 @@ export default {
         checkIfHit(x, y) {
             if (x == this.gameStore.survivor.pos.x && y == this.gameStore.survivor.pos.y) {
                 this.running = false;
+                this.$emit('gameEnd');
                 return true;
             }
             else {

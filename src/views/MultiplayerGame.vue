@@ -5,8 +5,18 @@ import MultiplayerBoard from "../components/MultiplayerBoard.vue";
 <template>
     <div class="container relative">
 
-        <MultiplayerBoard />
+        <MultiplayerBoard @gameEnd="gameEnd" />
         
         
     </div>
 </template>
+
+<script lang="ts">
+export default {
+    methods: {
+        gameEnd() {
+            console.log("Game ended");
+        }
+    }
+}
+</script>
