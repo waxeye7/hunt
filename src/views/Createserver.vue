@@ -83,7 +83,10 @@ export default {
         },
       })) {
         // The change event will always represent a newly inserted perennial
-        const { documentKey, fullDocument } = change;
+        if (change.operationType !== "update") {
+          continue;
+        }
+        const { fullDocument } = change;
         const { hunter, survivor } = fullDocument;
         if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
           this.bothConnected = true;

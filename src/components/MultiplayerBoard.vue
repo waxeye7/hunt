@@ -295,7 +295,10 @@ export default {
                 },
             })) {
                 // The change event will always represent a newly inserted perennial
-                const { documentKey, fullDocument } = change;
+                if (change.operationType !== "update") {
+                    continue;
+                }
+                const { fullDocument } = change;
                 // const { hunter, survivor } = fullDocument;
                 const survivorHasMoved = fullDocument.survivor.has_moved;
                 const hunterHasMoved = fullDocument.hunter.has_moved;
@@ -340,7 +343,10 @@ export default {
                 },
             })) {
                 // The change event will always represent a newly inserted perennial
-                const { documentKey, fullDocument } = change;
+                if (change.operationType !== "update") {
+                    continue;
+                }
+                const { fullDocument } = change;
                 if (fullDocument.survivor.has_moved && this.survivorPickingPos) {
                     console.log('survivor has moved')
                     this.survivorPickingPos = false;

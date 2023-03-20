@@ -1,20 +1,11 @@
 {
   "extends": "@vue/tsconfig/tsconfig.node.json",
-  "include": [
-    "index.ts",
-    "utils/**/*",
-    "src/*",
-    "src/**/*"
-  ],
+  "include": ["index.ts", "utils/**/*", "src/*", "src/**/*"],
   "compilerOptions": {
     "allowJs": true,
     "strict": false,
     "resolveJsonModule": true,
-    "ignoreDeprecations": "5.0"
-  },
-  "lib": [
-    "es5",
-    "es6",
-    "dom"
-  ]
+    "ignoreDeprecations": "5.0",
+    "lib": ["es5", "es6", "dom"]
+  }
 }

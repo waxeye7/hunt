@@ -1,12 +1,12 @@
-import { defineStore } from 'pinia';
-import * as Realm from "realm-web";
-import AuthApi from '../api/Auth';
+import { defineStore } from "pinia";
+import type * as Realm from "realm-web";
+import AuthApi from "../api/Auth";
 
 interface IAuthStore {
   app: Realm.App | null;
 }
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: (): IAuthStore => ({ app: null }),
   getters: {
     currentUser: (state) => state.app?.currentUser,
@@ -19,4 +19,4 @@ export const useAuthStore = defineStore('auth', {
       this.app = await AuthApi.init();
     },
   },
-})
+});

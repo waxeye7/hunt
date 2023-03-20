@@ -31,7 +31,7 @@ const GameApi = {
     const survivor = { ...defaultPlayer };
     survivor.has_connected = playerType === "survivor";
 
-    const game: Game = {
+    const game: Omit<Game, "_id"> = {
       hunter,
       survivor,
       board: gameBoard,
@@ -53,7 +53,7 @@ const GameApi = {
     }
 
     const mongo = user.mongoClient(dataSrc);
-    return mongo.db(dbName).collection("Games");
+    return mongo.db(dbName).collection<Game>("Games");
   },
 
   updateGameByCode: async (code: string, updateParams = {}) => {

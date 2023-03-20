@@ -31,6 +31,7 @@ export interface Terrain {
 }
 
 export interface Game {
+  _id: string;
   hunter: Player;
   survivor: Player;
   board: Board;
