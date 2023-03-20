@@ -1,39 +1,40 @@
 export interface Player {
-  pos: pos
-  has_connected: boolean,
-  has_moved: boolean,
+  pos: Pos;
+  has_connected: boolean;
+  has_moved: boolean;
 }
 
 export type Board = Array<Row>;
 export type Row = Array<Cell>;
+
 export interface Cell {
-  pos: pos,
-  has_survivor: boolean,
-  has_hunter: boolean,
-  survivor_trail: survivor_trail,
-  terrain: terrain
+  pos: Pos;
+  has_survivor: boolean;
+  has_hunter: boolean;
+  survivor_trail: SurvivorTrail;
+  terrain: Terrain;
 }
 
-export interface pos {
-  x: number,
-  y: number
+export interface Pos {
+  x: number;
+  y: number;
 }
 
-export interface survivor_trail {
-  strength: number,
-  show: boolean
+export interface SurvivorTrail {
+  strength: number;
+  show: boolean;
 }
 
-export interface terrain {
-  active: boolean,
-  passable: boolean
+export interface Terrain {
+  active: boolean;
+  passable: boolean;
 }
 
 export interface Game {
-  hunter: Player,
-  survivor: Player,
-  board: Board,
-  code: string,
+  hunter: Player;
+  survivor: Player;
+  board: Board;
+  code: string;
 }
 
 export type PlayerType = "hunter" | "survivor";
