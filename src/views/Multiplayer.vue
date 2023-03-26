@@ -3,69 +3,46 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 </script>
 
 <template>
-    <div class="container relative">
+    <div class="h-screen-minus-46 bg-green-400 flex flex-col justify-center items-center relative">
         <AbsoluteGuys />
-        <div class="txt-block">
-            <h1>Choose</h1>
-            <h1>Create or Join</h1>
+        <div class="text-center mb-10">
+            <h1 class="text-4xl">Choose</h1>
+            <h1 class="text-4xl">Create or Join</h1>
         </div>
-        <div class="flex flex-col links">
-            <router-link to="/multiplayer/create" class="link-style">Create Game</router-link>
-            <router-link to="/multiplayer/join" class="link-style">Join Game</router-link>
+        <div class="flex flex-col items-center pb-24">
+            <router-link to="/multiplayer/create"
+                class="text-white bg-gray-800 px-8 py-4 text-2xl rounded-lg shadow-lg mb-4 hover:bg-black transition duration-300">Create
+                Game</router-link>
+            <router-link to="/multiplayer/join"
+                class="text-white bg-gray-800 px-8 py-4 text-2xl rounded-lg shadow-lg hover:bg-black transition duration-300">Join
+                Game</router-link>
         </div>
-
-        <div class="players-online">
+        <div class="absolute left-1/2 transform -translate-x-1/2 bottom-16 text-center text-xl">
             <h1>87 Players Online</h1>
         </div>
     </div>
 </template>
 
 <style scoped>
-.players-online {
-    position:absolute;
-    left:50%;
-    transform: translate(-50%, 0);
-    top:64%;
+/* No need for .txt-block class, we can apply the styles directly to the h1 tags */
+.text-center {
     text-align: center;
-    font-size: clamp(14px, 2vw, 16px);
-    width:fit-content;
 }
-.txt-block {
-    font-size: clamp(16px, 2vw,20px);
-    position:absolute;
-    top:20%;
-    left:50%;
-    transform: translate(-50%, 0);
-    text-align: center;
-    width:fit-content;
-}
+
 .container {
-    height:calc(100vh - 46px);
-    background-color:rgba(86, 255, 71, 0.815) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-.links {
-    justify-content: center;
-    align-items: center;
-    padding-bottom:100px ;
-}
+
 .link-style {
     text-decoration: none;
-    margin-top:20px;
-    padding:30px;
-    background-color: rgb(46, 46, 46);
-    color:white;
-    font-size: 26px;
-    width:200px;
-    text-align: center;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
-
 }
-.link-style:hover {
-    background-color: rgb(0, 0, 0);
-    box-shadow: rgba(50, 50, 93, 0.356) 0px 23px 47px -10px, rgba(0, 0, 0, 0.449) 0px 16px 22px -14px;
 
+/* No need for .links class, we can apply the styles directly to the router-link tags */
+router-link {
+    width: 200px;
+    margin-top: 20px;
+    text-align: center;
 }
 </style>

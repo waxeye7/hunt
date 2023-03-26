@@ -1,15 +1,16 @@
 <script setup lang="ts"></script>
 
 <template>
-  <button @click="playAgain" class="button">
+  <div @click="playAgain" class="button">
     Play Again
-  </button>
+  </div>
 </template>
 
 <script lang="ts">
 export default {
   methods: {
     playAgain() {
+
     }
   }
 }

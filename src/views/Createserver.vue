@@ -8,24 +8,30 @@ import router from "../router";
 </script>
 
 <template>
-  <div class="container center flex flex-col relative">
+  <div class="h-screen-minus-46 bg-green-400 flex flex-col items-center relative">
     <AbsoluteGuys />
-    <div class="flex flex-col center">
+    <div class="flex flex-col items-center">
       <div v-if="!bothConnected">
         <div v-if="!created">
-          <h1>CHOOSE YOUR PLAYER TYPE</h1>
-          <button @click="playerType = 'hunter'">HUNTER</button>
-          <button @click="playerType = 'survivor'">SURVIVOR</button>
+          <h1 class="text-3xl font-bold mb-4 text-center">CHOOSE YOUR PLAYER TYPE</h1>
+          <div class="flex space-x-4 justify-center">
+            <div @click="playerType = 'hunter'" class="bg-blue-500 py-2 px-4 rounded-lg text-white cursor-pointer">HUNTER
+            </div>
+            <div @click="playerType = 'survivor'" class="bg-blue-500 py-2 px-4 rounded-lg text-white cursor-pointer">
+              SURVIVOR</div>
+          </div>
 
-          <p>YOUR PLAYER TYPE: {{ playerType }}</p>
+          <p class="text-lg font-semibold mt-4 text-center">YOUR PLAYER TYPE: {{ playerType }}</p>
 
-          <button v-if="playerType" @click="create">CREATE GAME</button>
+          <div v-if="playerType" @click="create"
+            class="text-center w-64 bg-blue-500 py-2 px-4 rounded-lg text-white cursor-pointer mt-4 ml-auto mr-auto">
+            CREATE GAME</div>
         </div>
         <div v-else>
-          <p>THIS IS YOUR CODE: {{ gameCode }}</p>
-          <h1 class="margin-bottom-tiny">Waiting for Opponent to join...</h1>
+          <p class="text-lg font-semibold">THIS IS YOUR CODE: {{ gameCode }}</p>
+          <h1 class="text-3xl font-bold mb-4">Waiting for Opponent to join...</h1>
           <img class="mr-bean" src="../assets/mr-bean-waiting.gif" alt="">
-          <div class="much-padding-bottom"></div>
+          <div class="pb-72"></div>
         </div>
       </div>
       <div v-else>YOUR OPPONENT HAS CONNECTED</div>
@@ -253,33 +259,10 @@ export default {
 </script>
 
 <style scoped>
-.much-padding-bottom {
-  padding-bottom: 76px;
-}
-
-.margin-bottom-much {
-  margin-bottom: 80px;
-}
-
-.padding-top26percent {
-  padding-top: 26%;
-}
-
-.margin-bottom-tiny {
-  margin-bottom: 10px;
-}
-
-.container {
-  height: calc(100vh - 46px);
-  background-color: rgba(86, 255, 71, 0.815) !important;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}
-
-span {
-  color: red;
+.mr-bean {
+  margin-right: auto;
+  margin-left: auto;
+  display: block;
+  margin-top: 24px;
 }
 </style>

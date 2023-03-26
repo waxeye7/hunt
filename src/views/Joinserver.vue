@@ -7,18 +7,17 @@ import router from "../router";
 </script>
 
 <template>
-  <div class="container flex flex-col center relative">
+  <div class="h-screen-minus-46 bg-green-400 flex flex-col items-center relative">
     <AbsoluteGuys />
-    <div v-if="!hasJoined">
-      <p>ENTER THE GAME CODE</p>
+    <div v-if="!hasJoined" class="flex flex-col items-center">
+      <p class="text-lg font-semibold mb-2">ENTER THE GAME CODE</p>
       <div class="flex">
-        <input v-model="gameCode" type="text">
-        <button class="go" @click="joinGame">Go</button>
+        <input v-model="gameCode" type="text" class="bg-gray-200 rounded-lg py-2 px-4 mr-2">
+        <button class="bg-blue-500 py-2 px-4 rounded-lg text-white cursor-pointer" @click="joinGame">Go</button>
       </div>
-      <h1>{{ gameCode }}</h1>
+      <h1 class="text-xl font-bold mt-4">{{ gameCode }}</h1>
     </div>
-    <div v-else>YOU HAVE SUCCESSFULLY JOINED</div>
-
+    <div v-else class="text-xl font-bold">YOU HAVE SUCCESSFULLY JOINED</div>
   </div>
 </template>
 
@@ -49,24 +48,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.go {
-  margin-left: 10px;
-  padding: 4px;
-  color: rgb(0, 0, 0);
-  cursor: pointer;
-}
-
-p {
-  margin-bottom: 8px;
-}
-
-.container {
-  height: calc(100vh - 46px);
-  background-color: rgba(86, 255, 71, 0.815) !important;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}</style>
+<style scoped></style>
