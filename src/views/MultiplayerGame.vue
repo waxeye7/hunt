@@ -3,11 +3,11 @@ import MultiplayerBoard from "../components/MultiplayerBoard.vue";
 </script>
 
 <template>
-    <div class="container relative">
+    <div class="relative">
 
         <MultiplayerBoard @gameEnd="gameEnd" />
-        
-        
+
+
     </div>
 </template>
 

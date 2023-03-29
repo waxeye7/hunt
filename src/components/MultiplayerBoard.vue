@@ -3,37 +3,52 @@ import 'animate.css';
 import { useGameStore } from "../stores/Game";
 import { mapStores } from 'pinia'
 import WinApi from "../api/Win";
+
+
+// import PlayAgainButton from './buttons/PlayAgainButton.vue';
 </script>
 
 <template>
-    <!-- HUNTER: {{ hunter.pos }}, SURVIVOR {{ survivor.pos }} -->
-    <div style="color:white">{{ gameStore.hunter }}</div>
-    <div style="color:white">{{ gameStore.survivor }}</div>
+    <div class="flex flex-col items-center justify-center h-screen-minus-46">
 
-    <div style="color:white; position:absolute">WELCOME YOU ARE PLAYING AS AN {{ gameStore.currentPlayerType.toUpperCase()
-    }}S</div>
-    <div class="flex flex-col align-center justify-center the-height relative">
 
-        <div v-if="survivorPickingPos && gameStore.currentPlayerType === 'survivor'" class="starting-location-style">pick
+
+
+        <!-- <div class="text-white">{{ gameStore.hunter }}</div>
+                                                    <div class="text-white">{{ gameStore.survivor }}</div> -->
+
+        <div class="text-white">{{ "WELCOME YOU ARE PLAYING AS AN " +
+            gameStore.currentPlayerType.toUpperCase() + "S" }}</div>
+
+        <div v-if="survivorPickingPos && gameStore.currentPlayerType === 'survivor'" class="starting-location-style">
+            pick
             your starting
             location now</div>
-        <div v-else-if="survivorPickingPos && gameStore.currentPlayerType === 'hunter'" class="starting-location-style">the
+        <div v-else-if="survivorPickingPos && gameStore.currentPlayerType === 'hunter'" class="starting-location-style">
+            the
             survivor is
             picking their starting location now</div>
         <div v-else-if="!running" class="starting-location-style">Game over</div>
 
-        <div class="board relative">
-            <div v-if="victory" class="victory-popup">
-                <h1 class="vertical-center">Victory</h1>
-            </div>
 
-            <div v-for="(row, rowIdx) in gameStore.board" :class="{ 'marginLeftBasedOnSquareSize': rowIdx % 2 == 1 }"
-                :key="rowIdx" class="row">
-                <div v-for="(col, colIdx) in row" :key="colIdx" :class="[
-                    'hex animate__animated animate__zoomIn',
-                    squareClasses(col.pos.x, col.pos.y),
-                ]" @click="handleUserClicked(col.pos.x, col.pos.y)">
-                    {{ `${col.pos.x}, ${col.pos.y}` }}
+
+        <div class="relative overflow-hidden">
+            <PlayAgainButton />
+
+
+
+            <div class="board relative">
+                <div v-if="victory" class="victory-popup">
+                    <h1 class="vertical-center">Victory</h1>
+                </div>
+
+                <div v-for="(row, rowIdx) in gameStore.board" :class="{ 'marginLeftBasedOnSquareSize': rowIdx % 2 == 1 }"
+                    :key="rowIdx" class="row">
+                    <div v-for="(col, colIdx) in row" :key="colIdx" :class="[
+                        'hex animate__animated animate__zoomIn',
+                        squareClasses(col.pos.x, col.pos.y),
+                    ]" @click="handleUserClicked(col.pos.x, col.pos.y)">
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,37 +400,8 @@ export default {
     min-height: calc(100vh - 46px)
 }
 
-.victory-popup {
-    position: absolute;
-    color: rgb(255, 255, 255);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 246px;
-    min-height: 82px;
-    z-index: 10;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    font-size: 30px;
-}
-
 .lower-brightness {
     filter: brightness(0.3) !important;
-}
-
-.starting-location-style {
-    color: white;
-    position: absolute;
-    top: 14%;
-    z-index: 100;
-    font-size: clamp(20px, 5vw, 30px);
-}
-
-.board {
-    padding: 48px;
-    background-color: rgb(88, 88, 88);
 }
 
 .row {
@@ -462,7 +448,7 @@ export default {
 
 .active {
     background-color: rgb(145, 145, 145) !important;
-    background-image: url("../assets/hunt.webp") !important;
+    background-image: url("../assets/hunt.gif") !important;
     background-size: 70px 70px;
     background-position: center;
     background-repeat: no-repeat;
@@ -490,7 +476,7 @@ export default {
 
 .survivor-see-hunter {
     background-color: rgb(145, 145, 145) !important;
-    background-image: url("../assets/hunt.webp") !important;
+    background-image: url("../assets/hunt.gif") !important;
     background-size: 70px 70px;
     background-position: center;
     background-repeat: no-repeat;
@@ -501,6 +487,9 @@ export default {
 
 .active:hover {
     outline: none !important;
+    background-color: rgb(167, 167, 167) !important;
+    transform: scale(1.05) !important;
+    cursor: pointer !important;
     /* background-color:rgb(105, 105, 105) !important;  */
 }
 
@@ -522,8 +511,9 @@ export default {
 
 
 .i-am-survivor:hover {
-    transform: scale(1) !important;
-    background-color: rgb(145, 145, 145) !important;
+    background-color: rgb(167, 167, 167) !important;
+    transform: scale(1.05) !important;
+    cursor: pointer !important;
     /* filter: none !important; */
 }
 
@@ -577,6 +567,35 @@ export default {
         flex-direction: column;
     }
 }
+
+.starting-location-style {
+    color: white;
+    z-index: 100;
+    font-size: clamp(20px, 5vw, 30px);
+}
+
+.victory-popup {
+    position: absolute;
+    color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 246px;
+    min-height: 82px;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.board {
+    padding: 48px;
+    background-color: rgb(88, 88, 88);
+}
+
+/* The rest of the CSS styles that are specific to the board and hexagons should remain unchanged */
 </style>
 
 

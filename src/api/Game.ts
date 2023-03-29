@@ -38,10 +38,20 @@ const GameApi = {
       code: gameCode,
     };
 
-    const games = await GameApi.getGames();
-    if (!games) return;
 
-    return await games?.insertOne(game);
+    if (gameCode) {
+      const shareableLink = `${window.location.origin}/multiplayer/join?code=${gameCode}`;
+
+
+      const games = await GameApi.getGames();
+      if (!games) return;
+
+      const result = await games?.insertOne(game);
+      if (result) {
+        return { gameCode, shareableLink };
+      }
+
+    }
   },
 
   getGames: async () => {

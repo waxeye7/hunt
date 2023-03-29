@@ -52,3 +52,5 @@ const SessionApi = {
         );
     },
 };
+
+export default SessionApi;

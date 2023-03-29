@@ -4,20 +4,23 @@ import WinApi from "../api/Win";
 </script>
 
 <template>
-    <div class="h-screen-minus-46 container mx-auto flex flex-col justify-center">
+    <div class="h-screen-minus-46 flex flex-col justify-center  bg-green-400 relative">
         <AbsoluteGuys />
-        <div class="menu-card bg-black p-16 text-white rounded-lg mb-3 mx-auto text-center">
-            <div class="txt-block">
-                <h1 class="text-xl">Welcome To</h1>
-                <h1 class="text-2xl">The Hunting Game!</h1>
-            </div>
-            <div class="links flex flex-col items-center pb-8">
-                <router-link to="/singleplayer" class="link-style">Singleplayer</router-link>
-                <router-link to="/multiplayer" class="link-style">Multiplayer</router-link>
-            </div>
-            <div class="text-center text-lg">
-                <h3>87 Players Online</h3>
-            </div>
+
+
+        <h1 class="text-4xl text-center mb-10 relative font-semibold">The Hunting Game
+            <h1 class="text-2xl text-center absolute top-[-30px] left-1/2 transform -translate-x-1/2 font-normal">Welcome
+                To</h1>
+        </h1>
+
+        <div class="flex flex-col items-center pb-24">
+            <router-link to="/singleplayer"
+                class="w-[240px] h-[70px] text-center text-white hover:bg-gray-800 px-8 py-4 text-2xl rounded-lg shadow-lg mb-4 bg-black transition duration-300">Singleplayer</router-link>
+            <router-link to="/multiplayer"
+                class="w-[240px] h-[70px] text-center text-white hover:bg-gray-800 px-8 py-4 text-2xl rounded-lg shadow-lg bg-black transition duration-300">Multiplayer</router-link>
+        </div>
+        <div class="absolute left-1/2 transform -translate-x-1/2 bottom-16 text-center text-xl">
+            <h1>87 Players Online</h1>
         </div>
     </div>
 </template>
@@ -59,15 +62,3 @@ export default {
     }
 }
 </script>
-
-
-
-<style scoped>
-.link-style {
-    @apply no-underline mt-5 px-8 py-6 bg-white text-black text-xl w-48 text-center rounded-md shadow-md;
-}
-
-.link-style:hover {
-    @apply bg-green-600 text-white shadow-lg;
-}
-</style>
