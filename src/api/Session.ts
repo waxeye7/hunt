@@ -39,7 +39,7 @@ const SessionApi = {
       return;
     }
 
-    const id = new Realm.BSON.ObjectId(sessionId);
+    const id = new ObjectId(sessionId);
 
     const currentSession = await sessions?.findOne({ _id: id });
     return currentSession;
