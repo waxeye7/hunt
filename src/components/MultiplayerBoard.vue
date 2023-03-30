@@ -5,6 +5,7 @@ import { mapStores } from 'pinia'
 import WinApi from "../api/Win";
 import router from '../router';
 
+import SessionApi from '../api/SessionApi';
 
 import PlayAgainButton from './buttons/PlayAgainButton.vue';
 </script>
@@ -16,7 +17,7 @@ import PlayAgainButton from './buttons/PlayAgainButton.vue';
 
 
         <!-- <div class="text-white">{{ gameStore.hunter }}</div>
-                                                                                                <div class="text-white">{{ gameStore.survivor }}</div> -->
+                                                                                                                        <div class="text-white">{{ gameStore.survivor }}</div> -->
 
         <div class="text-white">{{ "WELCOME YOU ARE PLAYING AS AN " +
             gameStore.currentPlayerType.toUpperCase() + "S" }}</div>
@@ -319,14 +320,21 @@ export default {
                     continue;
                 }
 
+                const currentSession = await SessionApi.getCurrentSession();
+                console.log(currentSession);
+
                 const { fullDocument } = change;
 
                 // Update the local game store
                 await this.gameStore.getGameByCode(fullDocument.code);
 
                 // Check if the game code has changed
+                console.log(this.gameStore.gameCode);
+                console.log(fullDocument.code);
                 if (fullDocument.code !== this.gameStore.gameCode) {
                     router.push(`/multiplayer/play/${fullDocument.code}`);
+                    this.victory = false;
+                    this.running = true;
                     return;
                 }
 

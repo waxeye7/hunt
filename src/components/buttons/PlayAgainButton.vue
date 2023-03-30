@@ -35,7 +35,6 @@ export default {
       gameBoard: [],
       waterBoardPositions: null,
       hunterStartingPos: null,
-
     }
   },
   computed: {
@@ -116,8 +115,8 @@ export default {
         this.waterBoardPositions.push(waterRowList);
       }
       this.createPassableTiles();
-      console.log(this.gameBoard)
-      console.log(this.startingSquare)
+
+
       this.gameBoard[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
       this.hunterStartingPos = { x: this.startingSquare[0], y: this.startingSquare[1] };
     },

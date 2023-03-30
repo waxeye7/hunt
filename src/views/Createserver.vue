@@ -150,9 +150,9 @@ export default {
   },
   methods: {
     applySettings() {
-      this.boardCols = this.tempCols;
-      this.boardRows = this.tempRows;
-      this.waterChance = this.tempWaterChance;
+      this.boardCols = Number(this.tempCols);
+      this.boardRows = Number(this.tempRows);
+      this.waterChance = Number(this.tempWaterChance);
     },
     declineSettings() {
       this.tempCols = this.boardCols;
@@ -170,11 +170,11 @@ export default {
         this.gameStore.currentPlayerType = this.playerType;
         const { gameCode, shareableLink } = await this.gameStore.createGame(this.playerType, this.gameCode, this.gameBoard, this.hunterStartingPos);
         this.shareableLink = shareableLink;
-        await this.gameStore.getGameByCode(this.gameCode);
+        await this.gameStore.getGameByCode(gameCode);
         this.created = true;
 
         const newSession = await SessionApi.createSession();
-        await SessionApi.addGameToCurrentSession(this.gameCode);
+        await SessionApi.addGameToCurrentSession(gameCode);
 
 
 
@@ -205,6 +205,8 @@ export default {
       this.gameBoard = [];
       this.waterBoardPositions = [];
       let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
+      console.log(this.boardCols, this.boardRows)
+      console.log(boardList)
       let rowNum = 0;
       let squareNumber = 1;
       for (let row of boardList) {
@@ -245,7 +247,8 @@ export default {
       this.createPassableTiles();
       this.victory = false;
       this.running = true;
-
+      console.log(this.gameBoard)
+      console.log(this.startingSquare)
       this.gameBoard[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
       this.hunterStartingPos = { x: this.startingSquare[0], y: this.startingSquare[1] };
     },
