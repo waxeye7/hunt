@@ -19,6 +19,7 @@ const SessionApi = {
         await authStore.init();
         const sessions = await SessionApi.getSessions();
         const newSession = {
+            _id: String,
             games: [],
             createdAt: new Date(),
         };

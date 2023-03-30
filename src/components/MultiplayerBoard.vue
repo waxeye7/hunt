@@ -3,9 +3,10 @@ import 'animate.css';
 import { useGameStore } from "../stores/Game";
 import { mapStores } from 'pinia'
 import WinApi from "../api/Win";
+import router from '../router';
 
 
-// import PlayAgainButton from './buttons/PlayAgainButton.vue';
+import PlayAgainButton from './buttons/PlayAgainButton.vue';
 </script>
 
 <template>
@@ -15,7 +16,7 @@ import WinApi from "../api/Win";
 
 
         <!-- <div class="text-white">{{ gameStore.hunter }}</div>
-                                                    <div class="text-white">{{ gameStore.survivor }}</div> -->
+                                                                                                <div class="text-white">{{ gameStore.survivor }}</div> -->
 
         <div class="text-white">{{ "WELCOME YOU ARE PLAYING AS AN " +
             gameStore.currentPlayerType.toUpperCase() + "S" }}</div>
@@ -33,7 +34,7 @@ import WinApi from "../api/Win";
 
 
         <div class="relative overflow-hidden">
-            <PlayAgainButton />
+            <PlayAgainButton :boardRows="gameStore.board.length" :boardCols="gameStore.board[0].length" :waterChance="30" />
 
 
 
@@ -65,6 +66,7 @@ export default {
             waterBoardPositions: [],
             running: true, //add running to gamestore
             victory: false,
+            hunterStartingPos: null,
         }
     },
     computed: {
@@ -307,26 +309,42 @@ export default {
             for await (const change of games.watch({
                 filter: {
                     operationType: "update",
-                    "fullDocument.code": this.gameStore.gameCode,
+                    $or: [
+                        { "fullDocument.code": this.gameStore.gameCode },
+                        { "fullDocument._id": this.$route.params.gameId },
+                    ],
                 },
             })) {
-                // The change event will always represent a newly inserted perennial
                 if (change.operationType !== "update") {
                     continue;
                 }
+
                 const { fullDocument } = change;
-                // const { hunter, survivor } = fullDocument;
+
+                // Update the local game store
+                await this.gameStore.getGameByCode(fullDocument.code);
+
+                // Check if the game code has changed
+                if (fullDocument.code !== this.gameStore.gameCode) {
+                    router.push(`/multiplayer/play/${fullDocument.code}`);
+                    return;
+                }
+
+                // Continue with the rest of the logic in playGame()
                 const survivorHasMoved = fullDocument.survivor.has_moved;
                 const hunterHasMoved = fullDocument.hunter.has_moved;
                 if (survivorHasMoved && hunterHasMoved) {
                     await this.resetForNewTurn()
                     console.log('both moved, resetting for next round')
                 }
-                if (!survivorHasMoved && !hunterHasMoved) {
-                    await this.gameStore.getGameByCode(this.gameStore.gameCode);
-
-                }
             }
+        },
+        async updateBoard(gameCode) {
+            await this.gameStore.getGameByCode(gameCode);
+            // this.gameBoard = this.gameStore.board;
+            // this.hunterStartingPos = this.gameStore.hunter.pos;
+
+            // // Update any other properties that depend on the game state
         },
 
         async checkIfGameOver() {
@@ -375,8 +393,12 @@ export default {
         },
 
     },
+    mounted() {
+        this.playGame();
+    },
 
     async created() {
+        this.hunterStartingPos = this.gameStore.hunter.pos;
         if (this.gameStore.currentPlayerType === "hunter") {
             await this.waitForSurvivorPosition();
         }

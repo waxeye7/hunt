@@ -73,13 +73,14 @@ import CopyToClipboardButton from "../components/buttons/CopyToClipboardButton.v
 
 
                 <div class="flex mt-auto">
+                  <div @click="modal = false; declineSettings()"
+                    class="text-center py-2 text-xl my-auto bg-red-400 flex-1 border-4 border-black cursor-pointer border-r-2 font-semibold">
+                    Cancel</div>
                   <div @click="modal = false; applySettings()"
-                    class="text-center py-2 text-xl bg-green-500 flex-1 border-4 border-black cursor-pointer border-r-2 font-semibold">
+                    class="text-center py-2 text-xl bg-green-500 flex-1 border-4 border-black cursor-pointer border-l-2 font-semibold">
                     Confirm
                   </div>
-                  <div @click="modal = false; declineSettings()"
-                    class="text-center py-2 text-xl my-auto bg-red-400 flex-1 border-4 border-black cursor-pointer border-l-2 font-semibold">
-                    Cancel</div>
+
                 </div>
 
 

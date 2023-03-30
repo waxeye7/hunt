@@ -1,8 +1,24 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
+import randomWords from "random-words";
 import { mapStores } from "pinia";
 import { useGameStore } from "../../stores/Game";
 import GameApi from '../../api/Game';
 import SessionApi from '../../api/SessionApi';
+import router from "../../router";
+defineProps({
+  boardCols: {
+    type: Number,
+    required: true
+  },
+  boardRows: {
+    type: Number,
+    required: true
+  },
+  waterChance: {
+    type: Number,
+    required: true
+  }
+});
 </script>
 
 <template>
@@ -14,34 +30,50 @@ import SessionApi from '../../api/SessionApi';
 
 <script lang="ts">
 export default {
+  data() {
+    return {
+      gameBoard: [],
+      waterBoardPositions: null,
+      hunterStartingPos: null,
+
+    }
+  },
   computed: {
     ...mapStores(useGameStore),
+
+    startingSquare() {
+      return [Math.floor(this.boardCols / 2), Math.floor(this.boardRows / 2)]
+    },
+    boardSize() {
+      return this.boardCols * this.boardRows;
+    },
   },
+
   methods: {
     async playAgain() {
-
       // Get the current session
       const currentSession = await SessionApi.getCurrentSession();
 
       // Create a new game with the same players
-      const newGameCode = generateNewGameCode(); // Implement a function to generate a new game code
-      const newGameBoard = generateNewGameBoard(); // Implement a function to generate a new game board
-      const hunterStartingPos = generateHunterStartingPos(); // Implement a function to generate hunter's starting position
+      const newGameCode = randomWords(3).join("-"); // Implement a function to generate a new game code
+      this.createGameBoard(); // Implement a function to generate a new game board
 
       await GameApi.createGame(
         this.gameStore.currentPlayerType,
         newGameCode,
-        newGameBoard,
-        hunterStartingPos
+        this.gameBoard,
+        this.hunterStartingPos
       );
 
       // Add the new game to the current session
       await SessionApi.addGameToCurrentSession(newGameCode);
 
+      // Update the game store with the new game code
+      await this.gameStore.getGameByCode(newGameCode);
+
       // Navigate to the new game
       router.push(`/multiplayer/play/${newGameCode}`);
     },
-
     createGameBoard() {
       this.gameBoard = [];
       this.waterBoardPositions = [];
@@ -84,9 +116,8 @@ export default {
         this.waterBoardPositions.push(waterRowList);
       }
       this.createPassableTiles();
-      this.victory = false;
-      this.running = true;
-
+      console.log(this.gameBoard)
+      console.log(this.startingSquare)
       this.gameBoard[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
       this.hunterStartingPos = { x: this.startingSquare[0], y: this.startingSquare[1] };
     },
@@ -171,7 +202,29 @@ export default {
           }
         }
       }
-    }
-  }
+
+      return neighbours;
+    },
+    createSquareObject(x, y, squareNumber) {
+      let square = {
+        id: squareNumber,
+        pos: {
+          x: x,
+          y: y
+        },
+        survivor_trail: {
+          strength: 0,
+          show: true,
+        },
+        terrain: {
+          active: true,
+          passable: true,
+        },
+        has_hunter: false,
+        has_survivor: false,
+      };
+      return square;
+    },
+  },
 }
-</script> -->
+</script>
