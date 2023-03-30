@@ -4,7 +4,6 @@ import { mapStores } from "pinia";
 import { useGameStore } from "../../stores/Game";
 import { useSessionStore } from "../../stores/Session";
 import router from "../../router";
-import { emit } from "process";
 </script>
 
 <template>
