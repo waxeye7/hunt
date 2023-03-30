@@ -16,7 +16,7 @@ import PlayAgainButton from './buttons/PlayAgainButton.vue';
 
 
         <!-- <div class="text-white">{{ gameStore.hunter }}</div>
-                                                                                                                        <div class="text-white">{{ gameStore.survivor }}</div> -->
+                                                                                                                            <div class="text-white">{{ gameStore.survivor }}</div> -->
 
         <div class="text-white">{{ "WELCOME YOU ARE PLAYING AS AN " +
             gameStore.currentPlayerType.toUpperCase() + "S" }}</div>
@@ -356,10 +356,10 @@ export default {
                 }
             }
         },
-        
+
         async resetData() {
             this.victory = false;
-            this.running = false;
+            this.running = true;
             this.survivorPickingPos = false;
             this.hunterStartingPos = this.gameStore.hunter.pos;
             if (this.gameStore.currentPlayerType === "hunter") {
