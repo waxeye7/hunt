@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import 'animate.css';
 import { useGameStore } from "../stores/Game";
+import { useSessionStore } from "../stores/Session";
 import { mapStores } from 'pinia'
 import WinApi from "../api/Win";
 import router from '../router';
-
-import SessionApi from '../api/SessionApi';
 
 import PlayAgainButton from './buttons/PlayAgainButton.vue';
 </script>
@@ -35,7 +34,7 @@ import PlayAgainButton from './buttons/PlayAgainButton.vue';
 
 
         <div class="relative overflow-hidden">
-            <PlayAgainButton :boardRows="gameStore.board.length" :boardCols="gameStore.board[0].length" :waterChance="30" />
+            <PlayAgainButton @playAgain="resetData" />
 
 
 
@@ -63,15 +62,15 @@ export default {
     data() {
         return {
             colSize: window.innerWidth / 25 + "px",
-            survivorPickingPos: true,
             waterBoardPositions: [],
+            survivorPickingPos: true,
             running: true, //add running to gamestore
             victory: false,
             hunterStartingPos: null,
         }
     },
     computed: {
-        ...mapStores(useGameStore),
+        ...mapStores(useGameStore, useSessionStore),
     },
     methods: {
         async bindSurvivorLocation(x, y) {
@@ -305,7 +304,7 @@ export default {
             return classes;
         },
 
-        async playGame() {
+        async gameItterator() {
             const games = await this.gameStore.getGames();
             for await (const change of games.watch({
                 filter: {
@@ -320,25 +319,8 @@ export default {
                     continue;
                 }
 
-                const currentSession = await SessionApi.getCurrentSession();
-                console.log(currentSession);
-
                 const { fullDocument } = change;
 
-                // Update the local game store
-                await this.gameStore.getGameByCode(fullDocument.code);
-
-                // Check if the game code has changed
-                console.log(this.gameStore.gameCode);
-                console.log(fullDocument.code);
-                if (fullDocument.code !== this.gameStore.gameCode) {
-                    router.push(`/multiplayer/play/${fullDocument.code}`);
-                    this.victory = false;
-                    this.running = true;
-                    return;
-                }
-
-                // Continue with the rest of the logic in playGame()
                 const survivorHasMoved = fullDocument.survivor.has_moved;
                 const hunterHasMoved = fullDocument.hunter.has_moved;
                 if (survivorHasMoved && hunterHasMoved) {
@@ -346,6 +328,48 @@ export default {
                     console.log('both moved, resetting for next round')
                 }
             }
+        },
+
+        async sessionItterator() {
+            const sessions = await this.sessionStore.getSessions();
+            for await (const change of sessions.watch({
+                filter: {
+                    operationType: "update",
+                    "fullDocument._id": this.sessionStore.session._id
+                },
+            })) {
+                if (change.operationType !== "update") {
+                    continue;
+                }
+
+                const { fullDocument } = change;
+
+                console.log(fullDocument.games, fullDocument._id);
+
+                // Check if game has been added to games array
+                console.log(this.sessionStore.session.games);
+                if (fullDocument.games.length > this.sessionStore.session.games.length) {
+                    await this.sessionStore.getSession(fullDocument._id);
+                    await this.gameStore.getGameByCode(fullDocument.games[fullDocument.games.length - 1]);
+                    router.push(`/multiplayer/play/${fullDocument.games[fullDocument.games.length - 1]}`);
+                    this.resetData();
+                }
+            }
+        },
+        
+        async resetData() {
+            this.victory = false;
+            this.running = false;
+            this.survivorPickingPos = false;
+            this.hunterStartingPos = this.gameStore.hunter.pos;
+            if (this.gameStore.currentPlayerType === "hunter") {
+                await this.waitForSurvivorPosition();
+            }
+        },
+
+        async playGame() {
+            this.gameItterator();
+            this.sessionItterator();
         },
         async updateBoard(gameCode) {
             await this.gameStore.getGameByCode(gameCode);

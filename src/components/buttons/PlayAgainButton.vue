@@ -2,23 +2,9 @@
 import randomWords from "random-words";
 import { mapStores } from "pinia";
 import { useGameStore } from "../../stores/Game";
-import GameApi from '../../api/Game';
-import SessionApi from '../../api/SessionApi';
+import { useSessionStore } from "../../stores/Session";
 import router from "../../router";
-defineProps({
-  boardCols: {
-    type: Number,
-    required: true
-  },
-  boardRows: {
-    type: Number,
-    required: true
-  },
-  waterChance: {
-    type: Number,
-    required: true
-  }
-});
+import { emit } from "process";
 </script>
 
 <template>
@@ -33,13 +19,19 @@ export default {
   data() {
     return {
       gameBoard: [],
+      waterChance: 30, //TODO: Make this a variable that can be changed by the user
       waterBoardPositions: null,
       hunterStartingPos: null,
     }
   },
   computed: {
-    ...mapStores(useGameStore),
-
+    ...mapStores(useGameStore, useSessionStore),
+    boardCols() {
+      return this.gameStore.board[0].length
+    },
+    boardRows() {
+      return this.gameStore.board.length
+    },
     startingSquare() {
       return [Math.floor(this.boardCols / 2), Math.floor(this.boardRows / 2)]
     },
@@ -50,28 +42,29 @@ export default {
 
   methods: {
     async playAgain() {
-      // Get the current session
-      const currentSession = await SessionApi.getCurrentSession();
-
       // Create a new game with the same players
       const newGameCode = randomWords(3).join("-"); // Implement a function to generate a new game code
       this.createGameBoard(); // Implement a function to generate a new game board
 
-      await GameApi.createGame(
+      const gameCode = await this.gameStore.createGame(
         this.gameStore.currentPlayerType,
         newGameCode,
         this.gameBoard,
         this.hunterStartingPos
       );
 
-      // Add the new game to the current session
-      await SessionApi.addGameToCurrentSession(newGameCode);
+      console.log({gameCode}, {gameBoard: this.gameBoard})
 
       // Update the game store with the new game code
-      await this.gameStore.getGameByCode(newGameCode);
+      await this.gameStore.getGameByCode(gameCode);
+      console.log(this.gameStore.game);
+
+      // Add the new game to the current session
+      await this.sessionStore.addGameToCurrentSession(newGameCode);
 
       // Navigate to the new game
       router.push(`/multiplayer/play/${newGameCode}`);
+      this.$emit("playAgain");
     },
     createGameBoard() {
       this.gameBoard = [];

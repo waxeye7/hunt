@@ -3,10 +3,8 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/Auth";
 import { useGameStore } from "../stores/Game";
+import { useSessionStore } from "../stores/Session";
 import router from "../router";
-
-import SessionApi from "../api/SessionApi";
-
 </script>
 
 <template>
@@ -15,8 +13,8 @@ import SessionApi from "../api/SessionApi";
     <div v-if="!hasJoined" class="flex flex-col items-center">
       <p class="text-lg font-semibold mb-2">Enter your Game Code</p>
       <div class="flex relative">
-        <input @keyup.enter="joinGame" v-model="gameCode" type="text" class="bg-gray-200 py-2 px-2">
-        <button class="bg-blue-500 py-2 px-4  text-white cursor-pointer" @click="joinGame">Enter</button>
+        <input @keyup.enter="joinGameAndSession" v-model="gameCode" type="text" class="bg-gray-200 py-2 px-2">
+        <button class="bg-blue-500 py-2 px-4  text-white cursor-pointer" @click="joinGameAndSession">Enter</button>
         <img v-if="joining" src="../assets/loading.gif" class="absolute top-[-42px] left-[264px] h-[100px] w-[96px]">
       </div>
     </div>
@@ -30,44 +28,49 @@ export default {
     return {
       joining: false,
       gameCode: "",
+      sessionId: "",
       hasJoined: false,
     }
   },
   computed: {
-    ...mapStores(useAuthStore, useGameStore)
-  },
-
-  mounted() {
-    this.checkForGameCodeInURL();
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.checkForGameCodeInURL();
-    next();
+    ...mapStores(useAuthStore, useGameStore, useSessionStore)
   },
   methods: {
-    async joinGame(gameCodeFromURL) {
+    async joinGameAndSession() {
       this.joining = true;
-      const gameCodeToJoin = gameCodeFromURL || this.gameCode;
       await this.authStore.init();
-      await this.gameStore.getGameByCode(gameCodeToJoin);
+      await this.gameStore.getGameByCode(this.gameCode);
       const playerType = this.gameStore.hunter.has_connected ? "survivor" : "hunter";
       this.gameStore.currentPlayerType = playerType;
       const updateParams = this.gameStore.hunter.has_connected ? { "survivor.has_connected": true } : { "hunter.has_connected": true };
-      await this.gameStore.updateGameByCode(gameCodeToJoin, updateParams);
-      await this.gameStore.getGameByCode(gameCodeToJoin);
+      await this.gameStore.updateGameByCode(this.gameCode, updateParams);
+      await this.gameStore.getGameByCode(this.gameCode);
 
-      const currentSession = await SessionApi.getCurrentSession() || await SessionApi.createSession();
-      await SessionApi.addGameToCurrentSession(gameCodeToJoin);
+      await this.sessionStore.getSession(this.sessionId);
 
       router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
     },
     checkForGameCodeInURL() {
       const urlParams = new URLSearchParams(window.location.search);
-      const gameCode = urlParams.get("code");
-      if (gameCode) {
-        this.joinGame(gameCode);
+   
+      this.gameCode = urlParams.get("gameCode");
+      this.sessionId = urlParams.get("sessionId");
+
+         console.log({gameCode: this.gameCode, sessionId: this.sessionId})
+      if (this.gameCode && this.sessionId) {
+        this.joinGameAndSession();
       }
     },
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    this.checkForGameCodeInURL();
+    next();
+  },
+
+  mounted() {
+    console.log('here')
+  this.checkForGameCodeInURL();
   },
 }
 

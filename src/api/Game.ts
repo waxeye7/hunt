@@ -38,19 +38,14 @@ const GameApi = {
       code: gameCode,
     };
 
-
     if (gameCode) {
-      const shareableLink = `${window.location.origin}/multiplayer/join?code=${gameCode}`;
-
-
       const games = await GameApi.getGames();
       if (!games) return;
 
       const result = await games?.insertOne(game);
       if (result) {
-        return { gameCode, shareableLink };
+        return gameCode;
       }
-
     }
   },
 
@@ -80,7 +75,7 @@ const GameApi = {
     }
 
     const mongo = user.mongoClient(dataSrc);
-    const collection = mongo.db(dbName).collection("Games");
+    const collection = mongo.db(dbName).collection<Game>("Games");
     return await collection.findOne({ code });
   },
 };

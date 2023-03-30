@@ -22,9 +22,6 @@ export const useGameStore = defineStore("game", {
       gameBoard: Board,
       hunterStartingPos: Pos
     ) {
-      if (this.game) {
-        return;
-      }
       return await GameApi.createGame(
         playerType,
         gameCode,

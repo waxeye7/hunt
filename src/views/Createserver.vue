@@ -4,9 +4,10 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/Auth";
 import { useGameStore } from "../stores/Game";
+import { useSessionStore } from "../stores/Session";
 import router from "../router";
 
-import SessionApi from "../api/SessionApi";
+import SessionApi from "../api/Session";
 
 import CopyToClipboardButton from "../components/buttons/CopyToClipboardButton.vue";
 
@@ -139,7 +140,7 @@ export default {
     }
   },
   computed: {
-    ...mapStores(useAuthStore, useGameStore),
+    ...mapStores(useAuthStore, useGameStore, useSessionStore),
 
     startingSquare() {
       return [Math.floor(this.boardCols / 2), Math.floor(this.boardRows / 2)]
@@ -168,15 +169,14 @@ export default {
         this.createGameBoard();
 
         this.gameStore.currentPlayerType = this.playerType;
-        const { gameCode, shareableLink } = await this.gameStore.createGame(this.playerType, this.gameCode, this.gameBoard, this.hunterStartingPos);
-        this.shareableLink = shareableLink;
+        const gameCode = await this.gameStore.createGame(this.playerType, this.gameCode, this.gameBoard, this.hunterStartingPos);
         await this.gameStore.getGameByCode(gameCode);
         this.created = true;
 
-        const newSession = await SessionApi.createSession();
-        await SessionApi.addGameToCurrentSession(gameCode);
+        await this.sessionStore.createSession();
+        await this.sessionStore.addGameToCurrentSession(gameCode);
 
-
+        this.shareableLink = `${window.location.origin}/multiplayer/join?gameCode=${this.gameStore.gameCode}&sessionId=${this.sessionStore.session._id}`;
 
         const games = await this.gameStore.getGames();
         for await (const change of games.watch({
