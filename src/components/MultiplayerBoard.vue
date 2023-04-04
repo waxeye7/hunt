@@ -16,7 +16,7 @@ import PlayAgainButton from './buttons/PlayAgainButton.vue';
 
 
         <!-- <div class="text-white">{{ gameStore.hunter }}</div>
-                                                                                                                            <div class="text-white">{{ gameStore.survivor }}</div> -->
+                                                                                                                                <div class="text-white">{{ gameStore.survivor }}</div> -->
 
         <div class="text-white">{{ "WELCOME YOU ARE PLAYING AS AN " +
             gameStore.currentPlayerType.toUpperCase() + "S" }}</div>
@@ -368,8 +368,8 @@ export default {
         },
 
         async playGame() {
-            this.gameItterator();
-            this.sessionItterator();
+            await this.gameItterator();
+            await this.sessionItterator();
         },
         async updateBoard(gameCode) {
             await this.gameStore.getGameByCode(gameCode);
