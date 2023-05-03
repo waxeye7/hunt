@@ -4,32 +4,115 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/Auth";
 import { useGameStore } from "../stores/Game";
+import { useSessionStore } from "../stores/Session";
 import router from "../router";
+
+import SessionApi from "../api/Session";
+
+import CopyToClipboardButton from "../components/buttons/CopyToClipboardButton.vue";
+
 </script>
 
 <template>
-  <div class="container center flex flex-col relative">
+  <div class="h-screen-minus-46 bg-green-400 flex flex-col items-center justify-center relative">
     <AbsoluteGuys />
-    <div class="flex flex-col center">
-      <div v-if="!bothConnected">
-        <div v-if="!created">
-          <h1>CHOOSE YOUR PLAYER TYPE</h1>
-          <button @click="playerType = 'hunter'">HUNTER</button>
-          <button @click="playerType = 'survivor'">SURVIVOR</button>
-
-          <p>YOUR PLAYER TYPE: {{ playerType }}</p>
-
-          <button v-if="playerType" @click="create">CREATE GAME</button>
+    <div v-if="!bothConnected">
+      <div v-if="!created">
+        <h1 class="text-3xl font-bold mb-4 text-center">CHOOSE PLAYER TYPE</h1>
+        <div class="flex space-x-4 justify-center">
+          <div @click="playerType = 'hunter'" class="bg-blue-700 py-2 px-4 rounded-lg text-white cursor-pointer">HUNTER
+          </div>
+          <div @click="playerType = 'survivor'" class="bg-blue-700 py-2 px-4 rounded-lg text-white cursor-pointer">
+            SURVIVOR</div>
         </div>
-        <div v-else>
-          <p>THIS IS YOUR CODE: {{ gameCode }}</p>
-          <h1 class="margin-bottom-tiny">Waiting for Opponent to join...</h1>
-          <img class="mr-bean" src="../assets/mr-bean-waiting.gif" alt="">
-          <div class="much-padding-bottom"></div>
+
+        <img v-if="!playerType" src="../assets/not_decided.png"
+          class="h-[200px] w-[200px] p-8 mx-auto border-4 border-solid border-black bg-white mt-4">
+        <img v-else-if="playerType === 'survivor'" src="../assets/survivor.gif"
+          class="h-[200px] w-[200px] p-8 mx-auto border-4 border-solid border-black bg-pink-500 mt-4">
+        <img v-else-if="playerType === 'hunter'" src="../assets/hunt.gif"
+          class="h-[200px] w-[200px] p-8 mx-auto border-4 border-solid border-black bg-red-500 mt-4">
+
+
+        <p v-if="!playerType" class="text-lg font-semibold mt-4 text-center">YOUR PLAYER TYPE: is undefined</p>
+        <p v-else class="text-lg font-semibold mt-4 text-center">YOUR PLAYER TYPE: {{ playerType }}</p>
+
+        <div class="flex align-center justify-center mt-4">
+          <div @click="modal = true"
+            class="z-100 w-[180px] text-lg font-normal text-center bg-blue-700 py-2 px-4 rounded-lg text-white cursor-pointer">
+            Advanced Settings
+          </div>
+
+          <div v-if="modal" class="z-[50] w-screen h-screen-minus-46 fixed top-0 left-0">
+            <div class="relative w-screen h-screen-minus-46">
+              <div
+                class="w-[350px] h-[500px] top-[27%] left-1/2 transform -translate-x-1/2 z-[100] bg-black absolute flex flex-col justify-center rounded-xl">
+
+
+                <h1 class="text-center text-white text-2xl font-bold py-4">Advanced Settings</h1>
+                <hr class="h-px w-[92%] mb-4 mx-auto my-2 bg-gray-200 border-0 dark:bg-white">
+
+
+                <div class="mx-4">
+                  <label for="boardCols" class="block text-lg font-semibold text-white">Columns: {{ tempCols
+                  }}</label>
+                  <input v-model="tempCols" id="boardCols" type="range" min="3" max="10"
+                    class="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer mb-4">
+
+                  <label for="boardRows" class="block text-lg font-semibold text-white">Rows: {{ tempRows
+                  }}</label>
+                  <input v-model="tempRows" id="boardRows" type="range" min="3" max="10"
+                    class="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer mb-4">
+
+                  <label for="waterChance" class="block text-lg font-semibold text-white">Water Chance: {{ tempWaterChance
+                  }}%</label>
+                  <input v-model="tempWaterChance" id="waterChance" type="range" min="0" max="100" step="10"
+                    class="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer mb-4">
+
+
+                </div>
+
+
+                <div class="flex mt-auto">
+                  <div @click="modal = false; declineSettings()"
+                    class="text-center py-2 text-xl my-auto bg-red-400 flex-1 border-4 border-black cursor-pointer border-r-2 font-semibold">
+                    Cancel</div>
+                  <div @click="modal = false; applySettings()"
+                    class="text-center py-2 text-xl bg-green-500 flex-1 border-4 border-black cursor-pointer border-l-2 font-semibold">
+                    Confirm
+                  </div>
+
+                </div>
+
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div :class="{ 'opacity-50': !playerType }" @click="create"
+            class="ml-4 w-[150px] text-center text-lg bg-orange-600 py-2 px-4 rounded-lg text-white cursor-pointer font-semibold ">
+            Create Game</div>
         </div>
       </div>
-      <div v-else>YOUR OPPONENT HAS CONNECTED</div>
+
+
+      <div v-else>
+        <div class="flex flex-col justify-center align-center">
+
+          <p class="text-lg font-semibold mb-2">{{ gameCode }}</p>
+          <CopyToClipboardButton buttonText="Copy Game Code To Clipboard" :message-to-copy="gameCode" class="mb-2" />
+          <CopyToClipboardButton buttonText="Copy Game URL To Clipboard" :message-to-copy="shareableLink" />
+          <h1 class="text-3xl font-bold mb-4 mt-4">Waiting for
+            Opponent to join...</h1>
+          <!-- <img class="h-[300px] w-[300px]" src="../assets/mr-bean-waiting.gif"> -->
+        </div>
+
+
+      </div>
     </div>
+    <div v-else>YOUR OPPONENT HAS CONNECTED</div>
   </div>
 </template>
 
@@ -37,13 +120,18 @@ import router from "../router";
 export default {
   data() {
     return {
+      tempWaterChance: 30,
+      tempCols: 5,
+      tempRows: 5,
+      modal: false,
       waterBoardPositions: null,
       playerType: null, // "survivor" or "hunter",
       gameCode: '',
+      shareableLink: '',
       gameBoard: [],
       boardCols: 5,
       boardRows: 5,
-      waterChance: 40,
+      waterChance: 30,
       hunterStartingPos: null,
       created: false,
       bothConnected: false,
@@ -52,7 +140,7 @@ export default {
     }
   },
   computed: {
-    ...mapStores(useAuthStore, useGameStore),
+    ...mapStores(useAuthStore, useGameStore, useSessionStore),
 
     startingSquare() {
       return [Math.floor(this.boardCols / 2), Math.floor(this.boardRows / 2)]
@@ -62,44 +150,63 @@ export default {
     },
   },
   methods: {
+    applySettings() {
+      this.boardCols = Number(this.tempCols);
+      this.boardRows = Number(this.tempRows);
+      this.waterChance = Number(this.tempWaterChance);
+    },
+    declineSettings() {
+      this.tempCols = this.boardCols;
+      this.tempRows = this.boardRows;
+      this.tempWaterChance = this.waterChance;
+    },
+
     async create() {
-      await this.authStore.init();
-      this.gameCode = randomWords(3).join("-");
+      if (this.playerType) {
+        await this.authStore.init();
+        this.gameCode = randomWords(3).join("-");
 
-      this.createGameBoard();
+        this.createGameBoard();
 
-      this.gameStore.currentPlayerType = this.playerType;
-      await this.gameStore.createGame(this.playerType, this.gameCode, this.gameBoard, this.hunterStartingPos);
-      await this.gameStore.getGameByCode(this.gameCode);
-      this.created = true;
+        this.gameStore.currentPlayerType = this.playerType;
+        const gameCode = await this.gameStore.createGame(this.playerType, this.gameCode, this.gameBoard, this.hunterStartingPos);
+        await this.gameStore.getGameByCode(gameCode);
+        this.created = true;
 
+        await this.sessionStore.createSession();
+        await this.sessionStore.addGameToCurrentSession(gameCode);
 
+        this.shareableLink = `${window.location.origin}/multiplayer/join?gameCode=${this.gameStore.gameCode}&sessionId=${this.sessionStore.session._id}`;
 
-      const games = await this.gameStore.getGames();
-      for await (const change of games.watch({
-        filter: {
-          operationType: "update",
-          "fullDocument.code": this.gameCode,
-        },
-      })) {
-        // The change event will always represent a newly inserted perennial
-        if (change.operationType !== "update") {
-          continue;
-        }
-        const { fullDocument } = change;
-        const { hunter, survivor } = fullDocument;
-        if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
-          this.bothConnected = true;
-          await this.gameStore.getGameByCode(this.gameCode);
+        const games = await this.gameStore.getGames();
+        for await (const change of games.watch({
+          filter: {
+            operationType: "update",
+            "fullDocument.code": this.gameCode,
+          },
+        })) {
+          // The change event will always represent a newly inserted perennial
+          if (change.operationType !== "update") {
+            continue;
+          }
+          const { fullDocument } = change;
+          const { hunter, survivor } = fullDocument;
+          if ((this.playerType === "hunter" && survivor.has_connected) || (this.playerType === "survivor" && hunter.has_connected)) {
+            this.bothConnected = true;
+            await this.gameStore.getGameByCode(this.gameCode);
 
-          router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
+            router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
+          }
         }
       }
+
     },
     createGameBoard() {
       this.gameBoard = [];
       this.waterBoardPositions = [];
       let boardList = [...Array(this.boardRows)].map(() => Array(this.boardCols));
+      console.log(this.boardCols, this.boardRows)
+      console.log(boardList)
       let rowNum = 0;
       let squareNumber = 1;
       for (let row of boardList) {
@@ -140,7 +247,8 @@ export default {
       this.createPassableTiles();
       this.victory = false;
       this.running = true;
-
+      console.log(this.gameBoard)
+      console.log(this.startingSquare)
       this.gameBoard[this.startingSquare[1]][this.startingSquare[0]].has_hunter = true;
       this.hunterStartingPos = { x: this.startingSquare[0], y: this.startingSquare[1] };
     },
@@ -251,35 +359,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.much-padding-bottom {
-  padding-bottom: 76px;
-}
-
-.margin-bottom-much {
-  margin-bottom: 80px;
-}
-
-.padding-top26percent {
-  padding-top: 26%;
-}
-
-.margin-bottom-tiny {
-  margin-bottom: 10px;
-}
-
-.container {
-  height: calc(100vh - 46px);
-  background-color: rgba(86, 255, 71, 0.815) !important;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}
-
-span {
-  color: red;
-}
-</style>

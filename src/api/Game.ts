@@ -38,10 +38,15 @@ const GameApi = {
       code: gameCode,
     };
 
-    const games = await GameApi.getGames();
-    if (!games) return;
+    if (gameCode) {
+      const games = await GameApi.getGames();
+      if (!games) return;
 
-    return await games?.insertOne(game);
+      const result = await games?.insertOne(game);
+      if (result) {
+        return gameCode;
+      }
+    }
   },
 
   getGames: async () => {
@@ -70,7 +75,7 @@ const GameApi = {
     }
 
     const mongo = user.mongoClient(dataSrc);
-    const collection = mongo.db(dbName).collection("Games");
+    const collection = mongo.db(dbName).collection<Game>("Games");
     return await collection.findOne({ code });
   },
 };

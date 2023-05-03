@@ -661,7 +661,7 @@ export default {
 
 .active {
     background-color: rgb(145, 145, 145) !important;
-    background-image: url("../assets/hunt.webp") !important;
+    background-image: url("../assets/hunt.gif") !important;
     background-size: 70px 70px;
     background-position: center;
     background-repeat: no-repeat;

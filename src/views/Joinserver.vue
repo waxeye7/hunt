@@ -3,22 +3,22 @@ import AbsoluteGuys from "../components/silly/AbsoluteGuys.vue";
 import { mapStores } from 'pinia'
 import { useAuthStore } from "../stores/Auth";
 import { useGameStore } from "../stores/Game";
+import { useSessionStore } from "../stores/Session";
 import router from "../router";
 </script>
 
 <template>
-  <div class="container flex flex-col center relative">
+  <div class="h-screen-minus-46 bg-green-400 flex flex-col items-center justify-center relative">
     <AbsoluteGuys />
-    <div v-if="!hasJoined">
-      <p>ENTER THE GAME CODE</p>
-      <div class="flex">
-        <input v-model="gameCode" type="text">
-        <button class="go" @click="joinGame">Go</button>
+    <div v-if="!hasJoined" class="flex flex-col items-center">
+      <p class="text-lg font-semibold mb-2">Enter your Game Code</p>
+      <div class="flex relative">
+        <input @keyup.enter="joinGameAndSession" v-model="gameCode" type="text" class="bg-gray-200 py-2 px-2">
+        <button class="bg-blue-500 py-2 px-4  text-white cursor-pointer" @click="joinGameAndSession">Enter</button>
+        <img v-if="joining" src="../assets/loading.gif" class="absolute top-[-42px] left-[264px] h-[100px] w-[96px]">
       </div>
-      <h1>{{ gameCode }}</h1>
     </div>
-    <div v-else>YOU HAVE SUCCESSFULLY JOINED</div>
-
+    <div v-else class="text-xl font-bold">YOU HAVE SUCCESSFULLY JOINED</div>
   </div>
 </template>
 
@@ -26,15 +26,18 @@ import router from "../router";
 export default {
   data() {
     return {
+      joining: false,
       gameCode: "",
+      sessionId: "",
       hasJoined: false,
     }
   },
   computed: {
-    ...mapStores(useAuthStore, useGameStore)
+    ...mapStores(useAuthStore, useGameStore, useSessionStore)
   },
   methods: {
-    async joinGame() {
+    async joinGameAndSession() {
+      this.joining = true;
       await this.authStore.init();
       await this.gameStore.getGameByCode(this.gameCode);
       const playerType = this.gameStore.hunter.has_connected ? "survivor" : "hunter";
@@ -43,30 +46,32 @@ export default {
       await this.gameStore.updateGameByCode(this.gameCode, updateParams);
       await this.gameStore.getGameByCode(this.gameCode);
 
+      await this.sessionStore.getSession(this.sessionId);
+
       router.push(`/multiplayer/play/${this.gameStore.gameCode}`);
-    }
+    },
+    checkForGameCodeInURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+   
+      this.gameCode = urlParams.get("gameCode");
+      this.sessionId = urlParams.get("sessionId");
+
+         console.log({gameCode: this.gameCode, sessionId: this.sessionId})
+      if (this.gameCode && this.sessionId) {
+        this.joinGameAndSession();
+      }
+    },
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    this.checkForGameCodeInURL();
+    next();
+  },
+
+  mounted() {
+    console.log('here')
+  this.checkForGameCodeInURL();
   },
 }
+
 </script>
-
-<style scoped>
-.go {
-  margin-left: 10px;
-  padding: 4px;
-  color: rgb(0, 0, 0);
-  cursor: pointer;
-}
-
-p {
-  margin-bottom: 8px;
-}
-
-.container {
-  height: calc(100vh - 46px);
-  background-color: rgba(86, 255, 71, 0.815) !important;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}</style>
